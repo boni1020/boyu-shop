@@ -1,4 +1,7 @@
-import { Link } from 'react-router-dom'
+/** @format */
+
+import { Link } from "react-router-dom";
+import { categories } from "../data/categories";
 
 function Navbar() {
   return (
@@ -7,12 +10,15 @@ function Navbar() {
 
       <div>
         <Link to="/">全部商品</Link>
-        <Link to="/category/零食">零食</Link>
-        <Link to="/category/食品">食品</Link>
-        <Link to="/category/保健品">保健品</Link>
+
+        {categories.map((category) => (
+          <Link key={category.slug} to={`/category/${category.slug}`}>
+            {category.name}
+          </Link>
+        ))}
       </div>
     </nav>
-  )
+  );
 }
 
-export default Navbar
+export default Navbar;
