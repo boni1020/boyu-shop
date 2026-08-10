@@ -4,7 +4,7 @@ export const categories = [
         slug: 'health',
     },
     {
-        name: '精選美言研',
+        name: '精選美研',
         slug: 'beauty',
     },
     {

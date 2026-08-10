@@ -3,7 +3,7 @@ import type { Product } from '../types/product'
 import { productCategories } from './productCategories'
 
 
-const EXCHANGE_RATE = 24
+const EXCHANGE_RATE = 20
 const SHIPPING_PER_KG = 8
 const SERVICE_FEE = 200
 
