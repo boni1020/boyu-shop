@@ -1,1 +1,39 @@
 @import "tailwindcss";
+
+
+/* 顏色定義 */
+@theme {
+    --color-primary: #438DB8;
+    --color-secondary: #2B8D9C;
+    --color-tertiary: #ffb94b;
+    --color-dark: #33546C;
+    --color-background: #F6F6F6;
+}
+
+
+/* 文字基本設定 */
+@theme {
+    --font-sans: "Noto Sans TC", sans-serif;
+    --letter-spacing-heading: 0.025em;
+
+    --text-h1: 48px;
+    --text-h1-line-height: 1.5rem;
+    --text-h1-font-weight: 700;
+
+    --text-h2: 36px;
+    --text-h2-line-height: 1.5rem;
+    --text-h2-font-weight: 700;
+
+    --text-h3: 20px;
+    --text-h3-line-height: 1.5rem;
+    --text-h3-font-weight: 700;
+
+    --text-h4: 18px;
+    --text-h4-line-height: 1.5rem;
+    --text-h4-font-weight: 500;
+
+    /* Body */
+    --text-p1: 14px;
+    --text-p1-line-height: 1.5rem;
+    --text-p1-font-weight: 400;
+}

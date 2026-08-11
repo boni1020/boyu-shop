@@ -3,9 +3,9 @@ import type { Product } from '../types/product'
 import { productCategories } from './productCategories'
 
 
-const EXCHANGE_RATE = 20
-const SHIPPING_PER_KG = 8
-const SERVICE_FEE = 200
+const EXCHANGE_RATE = 20 //匯率
+const SHIPPING_PER_KG = 8 // 每公斤運費
+const SERVICE_FEE = 200 // 服務費
 
 const calculatePrice = (money: number, weight: number) => {
   const price =
