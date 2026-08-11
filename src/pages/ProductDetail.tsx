@@ -44,9 +44,9 @@ function ProductDetail() {
             <h2 className="text-2xl font-semibold text-gray-900">
               {product.name}
             </h2>
-            <p className="mt-1 text-sm text-gray-400">
+            {/* <p className="mt-1 text-sm text-gray-400">
               {product.roast || "Light Espresso Roast"}
-            </p>
+            </p> */}
           </div>
           <div className="flex items-center gap-1 rounded-full bg-[#fdf3e7] px-3 py-1">
             <svg
@@ -58,9 +58,9 @@ function ProductDetail() {
             >
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
-            <span className="text-sm font-bold text-[#d97706]">
+            {/* <span className="text-sm font-bold text-[#d97706]">
               {product.rating || "4.9"}
-            </span>
+            </span> */}
           </div>
         </div>
 
