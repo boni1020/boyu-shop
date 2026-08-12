@@ -16,8 +16,6 @@ function CategoryPage() {
 
   return (
     <main>
-      <h1>{category?.name}</h1>
-
       <div className="mx-auto grid max-w-screen-xl grid-cols-2 gap-4 px-5 pb-8 md:grid-cols-5">
         {categoryProducts.map((product) => (
           <ProductCard key={product.id} product={product} />
