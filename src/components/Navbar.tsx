@@ -7,7 +7,7 @@ function Navbar() {
   return (
     <nav className="">
       <div className="bg-primary h-14"></div>
-      <div className="mx-auto flex max-w-screen-xl items-center px-25 py-7">
+      <div className="mx-auto flex max-w-screen-xl items-center px-4 md:px-25 py-7">
         <div className="flex flex-1 justify-start gap-3">
           {" "}
           {/* 左側預留空間 (Logo區塊) */}
@@ -20,7 +20,7 @@ function Navbar() {
         </div>
 
         {/* 中間導覽連結 */}
-        <div className="flex min-w-0 items-center gap-3 overflow-x-auto text-h4 text-gray-500">
+        <div className="scrollable flex min-w-0 items-center gap-3 overflow-x-auto text-h4 text-gray-500">
           <Link
             to="/"
             className="shrink-0 whitespace-nowrap font-medium text-text-main transition-colors hover:text-primary"
