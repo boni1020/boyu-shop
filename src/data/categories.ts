@@ -1,24 +1,67 @@
-export const categories = [
-    {
-        name: '生活補給',
-        slug: 'health',
-    },
-    {
-        name: '精選美研',
-        slug: 'beauty',
-    },
-    {
-        name: '舒適配飾',
-        slug: 'fashion',
-    },
-    {
-        name: '日之選用',
-        slug: 'lifestyle',
-    },
-    {
-        name: '食光選物',
-        slug: 'snacks',
-    },
-] as const
+import { Category } from '../types';
 
-export type Category = (typeof categories)[number]['name']
+export const CATEGORIES: Category[] = [
+  {
+    id: 'new-arrivals',
+    name: '新品上市',
+    englishName: 'New Arrivals',
+    slug: 'new-arrivals',
+    description: '來自澳洲海岸與陽光森林的最新季度選物，捕捉自然與居所的純粹氣息。',
+    story: '每一季，我們航向澳洲東岸的拜倫灣、南澳的植物莊園與墨爾本的獨立工坊，為您拾起最溫潤的自然生活靈感。',
+    heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'life',
+    name: '生活補給',
+    englishName: 'Living & Botanical Care',
+    slug: 'life',
+    description: '以澳洲原生植物精油、天然礦物與海洋元素調製的居家清潔與日常補給。',
+    story: '告別化學刺鼻，擁抱塔斯馬尼亞薰衣草、檸檬茶樹與尤加利葉的清爽芬芳，讓居家日常如沐沿海微風。',
+    heroImage: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'beauty',
+    name: '精選美研',
+    englishName: 'Coastal Beauty & Skincare',
+    slug: 'beauty',
+    description: '汲取澳洲純淨陽光與原生植物能量，溫和滋養每寸肌膚與髮絲。',
+    story: '卡卡杜李、野生指橙與荷荷芭油，來自不受污染的大地餽贈，為現代生活洗滌疲憊，煥發自然透亮光采。',
+    heroImage: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'accessories',
+    name: '舒適配飾',
+    englishName: 'Comfort & Coastal Living',
+    slug: 'accessories',
+    description: '有機亞麻、天然棉麻與海灘休閒選品，展現隨性自在的澳式生活步調。',
+    story: '帶著寬簷草帽、透氣亞麻托特包與戶外野餐墊，隨時出發前往海浪拍打的金色沙灘，享受無拘陽光。',
+    heroImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'essentials',
+    name: '日之選用',
+    englishName: 'Daily Essentials & Objects',
+    slug: 'essentials',
+    description: '簡約陶器、環保隨行杯與器物美學，為每一次舉杯與晨光注入質樸溫度。',
+    story: '從咖啡廢棄物再造的質感隨行杯，到澳洲陶藝家手工拉胚的茶器，在日常瑣碎中實踐對環境友善的極簡哲學。',
+    heroImage: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'food-pantry',
+    name: '食光選物',
+    englishName: 'Pantry & Coastal Bites',
+    slug: 'food-pantry',
+    description: '澳洲有機花草茶、冷壓橄欖油、生蜂蜜與純淨小點，品味大自然的原始甘醇。',
+    story: '維多利亞州橄欖林、拜倫灣手工草本茶，每一口都蘊含南半球豐沛陽光與純淨水土的真實滋味。',
+    heroImage: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=1800&q=80',
+  },
+  {
+    id: 'clearance',
+    name: '清倉特價',
+    englishName: 'Clearance & Season End',
+    slug: 'clearance',
+    description: '限量季節庫存特惠與過季精選，以最驚喜的心動價格收藏澳洲純淨好物。',
+    story: '給予每一件美好物件一個溫暖的歸宿，限時倒數特惠，數量有限，售完即止。',
+    heroImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80',
+  },
+];
