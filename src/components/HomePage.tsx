@@ -109,14 +109,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
               <span>資料讀取發生異常：{activeError}</span>
             </div>
-            <button
-              type="button"
-              onClick={handleGlobalRetry}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-red-600 text-white font-semibold rounded-md shadow-xs hover:bg-red-700 transition-colors cursor-pointer text-xs"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span>重新載入 Supabase 資料</span>
-            </button>
           </div>
         </div>
       )}
@@ -128,7 +120,6 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Background Image with ocean sunlight */}
         <img
           src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80"
-          alt="Australian Coastal Nature"
           className="absolute inset-0 w-full h-full object-cover object-center opacity-40 mix-blend-multiply scale-105"
           referrerPolicy="no-referrer"
         />
@@ -140,11 +131,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-white w-full">
           <div className="max-w-2xl">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white font-serif-brand leading-[1.15] mb-6">
-              棲居於海，拾起澳洲海岸的純淨日常。
+              拾起澳洲的純淨日常
             </h1>
 
             <p className="text-sm md:text-base text-white/90 leading-relaxed max-w-xl mb-8 font-light">
-              從拜倫灣的日光沙灘、墨爾本的獨立陶藝工坊，到塔斯馬尼亞的原生植萃。波嶼將南半球不受拘束的純淨生活感，化為溫潤日常。
+              波嶼將南半球不受拘束的純淨生活感，化為溫潤日常
             </p>
 
             <div className="flex items-center gap-4">
@@ -152,9 +143,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 type="button"
                 id="btn-hero-explore-life"
                 onClick={() => onSelectCategory(exploreCategoryId)}
-                className="px-7 py-3.5 rounded-full bg-[#438DB8] text-white text-xs md:text-sm font-semibold shadow-lg hover:bg-[#438DB8]/90 transition-all flex items-center gap-2 group cursor-pointer border border-white/20"
+                className="px-7 py-3.5 rounded-full bg-[#438DB8] text-white text-xs md:text-sm font-semibold shadow-lg hover:bg-[#438DB8]/90 transition-all flex items-center gap-2 group cursor-pointer"
               >
-                <span>探索生活補給</span>
+                <span>前往生活補給</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -179,7 +170,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               新品上市
             </h2>
             <p className="text-xs sm:text-sm text-[#263B3F]/70 mt-1">
-              本季最新抵台的澳洲海岸植萃與日光選物
+              本季最新抵台的澳洲選物
             </p>
           </div>
 
@@ -213,7 +204,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         ) : newArrivals.length === 0 ? (
           <div className="py-12 text-center bg-white/60 border border-[#263B3F]/10 rounded-xl">
-            <p className="text-[#263B3F]/70 text-sm">目前 Supabase 資料庫尚無新品上架</p>
+            <p className="text-[#263B3F]/70 text-sm">目前尚無新品上架</p>
           </div>
         ) : (
           /* Products Grid: Desktop 6 cols | Tablet 3 cols | Mobile 2 cols */
@@ -253,10 +244,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               AUSTRALIAN PANTRY & GOURMET
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-serif-brand leading-tight mb-4 text-white">
-              食光選物：品嚐南半球的陽光與豐饒大地。
+              食光選物：品嚐南半球的陽光與豐饒大地
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed mb-8 max-w-xl font-light">
-              原生麥蘆卡蜂蜜、冷壓初榨橄欖油、澳洲有機堅果與烘焙手工燕麥。由大自然純粹孕育的風味，點亮每一日的餐桌食光。
+              原生麥蘆卡蜂蜜、澳洲有機堅果，點亮每一日的餐桌食光。
             </p>
 
             <button
@@ -273,7 +264,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="hidden lg:flex flex-col gap-3 bg-black/25 backdrop-blur-md p-6 rounded-none border border-white/15 text-xs text-white/90 max-w-sm">
             <div className="font-semibold text-[#FFB94B] text-sm">純粹天然 ∙ 無人工添加</div>
             <p className="text-white/75 leading-relaxed">
-              嚴選澳洲在地純淨小農與莊園生產，通過嚴格有機純度檢驗，讓每一口都嚐得到純粹的自然原味。
+              嚴選澳洲在地純淨生產，讓每一口都嚐得到純粹的自然原味。
             </p>
           </div>
         </div>
@@ -288,10 +279,10 @@ export const HomePage: React.FC<HomePageProps> = ({
             CURATED CATEGORIES
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#263B3F] font-serif-brand">
-            探索澳洲海岸選物
+            探索澳洲選物
           </h2>
           <p className="text-xs md:text-sm text-[#263B3F]/70 mt-1">
-            由南半球自然與生活哲學啟發的風格主題
+            南半球的自然與生活的風格主題
           </p>
         </div>
 
@@ -395,7 +386,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </h2>
 
               <p className="text-sm md:text-base text-white/80 leading-relaxed mb-6 font-light max-w-md mx-auto lg:mx-0">
-                限量選物，售完為止。換季絕版與典藏庫存出清，以最心動價格收藏純淨生活。
+                限量選物，售完為止。換季與典藏庫存出清，以最心動價格收藏純淨生活。
               </p>
 
               <button
@@ -420,7 +411,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               ) : clearanceProducts.length === 0 ? (
                 <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-8 text-center text-white/80">
                   <p className="text-sm font-medium">目前清倉專區暫無出清選物</p>
-                  <p className="text-xs text-white/60 mt-1">歡迎隨時瀏覽其他純淨分類商品</p>
+                  <p className="text-xs text-white/60 mt-1">歡迎隨時瀏覽其他分類商品</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">

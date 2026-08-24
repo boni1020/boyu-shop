@@ -27,9 +27,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateHome }) => {
                   BO YU
                 </span>
               </div>
-              <span className="text-[10px] tracking-widest text-[#F6F3EA]/60 uppercase font-light">
-                Australian Coastal Nature
-              </span>
             </div>
 
             <p className="text-xs text-[#F6F3EA]/75 leading-relaxed max-w-lg mb-6">
@@ -52,7 +49,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigateHome }) => {
               <li>電子信箱：hello@boyu-coastal.com</li>
               <li>全台配送：宅配 / 超商取貨</li>
               <li className="pt-2 text-[11px] text-[#438DB8] font-medium">
-                ✦ 滿額 NT$ 1,500 即享全島免運
+                ✦ 滿額 NT$ 2,000 即享全島免運
               </li>
             </ul>
           </div>

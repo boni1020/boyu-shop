@@ -33,9 +33,9 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const freeShippingThreshold = 1500;
+  const freeShippingThreshold = 2000;
   const isFreeShipping = cartTotal >= freeShippingThreshold;
-  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 80;
+  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 60;
   const finalTotal = cartTotal + shippingFee;
 
   if (cart.length === 0) {

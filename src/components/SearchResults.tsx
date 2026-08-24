@@ -54,6 +54,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
     e.preventDefault();
     if (searchInput.trim()) {
       onSearchChange(searchInput.trim());
+      setSearchInput('');
     }
   };
 
@@ -135,12 +136,12 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
               找不到與「{searchQuery}」相關的商品
             </h3>
             <p className="text-xs md:text-sm text-[#263B3F]/70 mb-6 leading-relaxed">
-              請嘗試使用其他關鍵字（如：尤加利、洗手露、Aesop、草本、陶器、拜倫灣），或直接瀏覽下方推薦的分類選物。
+              請嘗試使用其他關鍵字（如：精油、Healthy Care、面膜、綿羊油、魚油、葉黃素），或直接瀏覽下方推薦的分類選物。
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
               <span className="text-xs text-[#263B3F]/60">熱門搜尋推薦：</span>
-              {['Bondi Wash', '尤加利', 'Grown Alchemist', '隨行杯', '有機茶', '草帽'].map((term) => (
+              {['Swisse', '尤加利', 'Blackmores', 'Eaoron', '膠原蛋白', '魚油'].map((term) => (
                 <button
                   key={term}
                   type="button"

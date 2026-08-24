@@ -131,12 +131,12 @@ function mapSupabaseProduct(raw: any): Product {
     clearancePrice,
     imageUrl,
     hoverImageUrl,
-    description: raw.description || `${raw.name}，源自澳洲純淨天然配方。`,
-    shortDescription: raw.description
-      ? raw.description.length > 50
-        ? raw.description.slice(0, 50) + '...'
-        : raw.description
-      : `${brandName} 嚴選品質`,
+    description: raw.description ? String(raw.description) : '',
+    shortDescription: raw.description,
+      // ? raw.description.length > 50
+      //   ? raw.description.slice(0, 50) + '...'
+      //   : raw.description
+      // : (brandName ? `${brandName} 嚴選品質` : ''),
     origin: originStr,
     tags,
     inStock: raw.is_active !== false,

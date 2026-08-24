@@ -1,6 +1,6 @@
 {
-  "name": "波嶼 BoYu | 澳洲海岸生活選物",
-  "description": "波嶼選物 - 澳洲自然生活選物品牌，提供七大分類選品、動態品牌篩選、全站搜尋與海岸自然美學設計",
+  "name": "波嶼 BoYu | 澳洲生活選物",
+  "description": "波嶼選物 - 來自澳洲自然生活選物",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

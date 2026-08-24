@@ -3,13 +3,7 @@ import { Category, Product, CategoryId } from '../types';
 import { BrandFilter } from './BrandFilter';
 import { ProductCard } from './ProductCard';
 import { getBrandsForCategory, filterProducts, matchesCategory } from '../utils/filterUtils';
-import {
-  ChevronRight,
-  ArrowUpDown,
-  X,
-  Sparkles,
-  Compass,
-} from 'lucide-react';
+import { ChevronRight, ArrowUpDown, Sparkles } from 'lucide-react';
 
 interface CategoryLayoutProps {
   category: Category;
@@ -30,7 +24,6 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
   onNavigateHome,
 }) => {
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'newest'>('featured');
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
   // 1. Calculate brands dynamically for this specific category
   const dynamicBrands = useMemo(() => {
@@ -104,94 +97,46 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        {/* Mobile / Tablet Filter & Sort Bar */}
-        <div className="lg:hidden flex items-center justify-between gap-3 mb-6 p-3 bg-white rounded-xl border border-[#263B3F]/10 shadow-xs">
-          {/* Scrollable brand pills (全部, Brand A, Brand B...) */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 min-w-0 flex-grow">
-            <button
-              type="button"
-              id="btn-mobile-filter-all"
-              onClick={() => onSelectBrand('all')}
-              className={`text-xs px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                selectedBrand === 'all'
-                  ? 'bg-[#438DB8] text-white font-medium shadow-xs'
-                  : 'bg-[#F6F3EA] text-[#263B3F]/80 border border-[#263B3F]/12 hover:border-[#438DB8]/40'
-              }`}
-            >
-              <span>全部</span>
-            </button>
-            {dynamicBrands.map((b) => (
-              <button
-                key={b.name}
-                type="button"
-                id={`btn-mobile-brand-${b.name.toLowerCase().replace(/\s+/g, '-')}`}
-                onClick={() => onSelectBrand(b.name)}
-                className={`text-xs px-3.5 py-1.5 rounded-full whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  selectedBrand.toLowerCase() === b.name.toLowerCase()
-                    ? 'bg-[#438DB8] text-white font-medium shadow-xs'
-                    : 'bg-[#F6F3EA] text-[#263B3F]/80 border border-[#263B3F]/12 hover:border-[#438DB8]/40'
-                }`}
-              >
-                <span>{b.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Sort Selector */}
-          <div className="flex items-center gap-1.5 shrink-0 border-l border-[#263B3F]/10 pl-3">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#263B3F]/60" />
-            <select
-              id="sort-select-mobile"
-              aria-label="排序商品"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="text-xs bg-transparent border-0 text-[#263B3F] font-medium focus:ring-0 cursor-pointer pr-1"
-            >
-              <option value="featured">推薦</option>
-              <option value="price-asc">價低</option>
-              <option value="price-desc">價高</option>
-              <option value="newest">最新</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Desktop 2-Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Left Column: Brand Filter Sidebar (Desktop) */}
-          <div className="hidden lg:block lg:col-span-1">
-            <div className="sticky top-24 bg-white/70 backdrop-blur-xs p-5 rounded-2xl border border-[#263B3F]/10 shadow-[0_2px_16px_rgba(38,59,63,0.03)]">
+      {/* Main Content Area: Left Sidebar (Brand + Sort) & Right Products */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+        <div className="flex flex-row gap-3 sm:gap-6 lg:gap-8">
+          {/* Left Column: Sticky Brand Filter + Sort Sidebar (Mobile, Tablet, Desktop) */}
+          <div className="w-[110px] sm:w-44 md:w-52 lg:w-64 shrink-0">
+            <div className="sticky top-[135px] sm:top-[160px] lg:top-[176px] bg-white/70 backdrop-blur-xs p-2.5 sm:p-4 lg:p-5 rounded-xl sm:rounded-2xl border border-[#263B3F]/10 shadow-[0_2px_16px_rgba(38,59,63,0.03)]">
               <BrandFilter
                 brands={dynamicBrands}
                 selectedBrand={selectedBrand}
                 onSelectBrand={onSelectBrand}
               />
+
+              {/* Sort Control in the Left Sidebar */}
+              <div className="pt-2.5 sm:pt-4 mt-2.5 sm:mt-4 border-t border-[#263B3F]/12">
+                <div className="flex items-center gap-1.5 mb-1.5 sm:mb-2">
+                  <ArrowUpDown className="w-3.5 h-3.5 text-[#2B8D9C]" />
+                  <span className="text-xs sm:text-sm font-semibold text-[#263B3F] tracking-wide">
+                    排序
+                  </span>
+                </div>
+                <select
+                  id="sort-select"
+                  aria-label="排序商品"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full bg-white border border-[#263B3F]/15 rounded-lg px-1.5 sm:px-2.5 py-1.5 text-[11px] sm:text-xs text-[#263B3F] font-medium focus:ring-2 focus:ring-[#438DB8]/30 focus:border-[#438DB8] outline-hidden cursor-pointer"
+                >
+                  <option value="featured">推薦排序</option>
+                  <option value="price-asc">價格：低至高</option>
+                  <option value="price-desc">價格：高至低</option>
+                  <option value="newest">新品優先</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Right Column: Product Grid & Top Bar */}
-          <div className="lg:col-span-3">
-            {/* Desktop Sort Selector Bar */}
-            <div className="hidden lg:flex items-center justify-end gap-2 text-xs text-[#263B3F]/80 mb-6">
-              <span className="text-[#263B3F]/60">排序：</span>
-              <select
-                id="sort-select-desktop"
-                aria-label="排序商品"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-white border border-[#263B3F]/15 rounded-lg px-3 py-1.5 text-xs text-[#263B3F] font-medium focus:ring-2 focus:ring-[#438DB8]/30 focus:border-[#438DB8] outline-hidden cursor-pointer"
-              >
-                <option value="featured">推薦排序</option>
-                <option value="price-asc">價格：低至高</option>
-                <option value="price-desc">價格：高至低</option>
-                <option value="newest">新品優先</option>
-              </select>
-            </div>
-
-            {/* Products Grid */}
+          {/* Right Column: Product Grid */}
+          <div className="flex-1 min-w-0">
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard
                     key={product.id}
@@ -225,66 +170,6 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Mobile Filter Drawer / Bottom Sheet */}
-      {mobileFilterOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex justify-end">
-          <div
-            className="fixed inset-0 bg-[#263B3F]/60 backdrop-blur-xs"
-            onClick={() => setMobileFilterOpen(false)}
-          />
-          <div
-            id="mobile-filter-drawer"
-            className="relative w-full max-w-xs bg-[#F6F3EA] h-full shadow-2xl p-6 flex flex-col z-10 animate-in slide-in-from-right duration-200"
-          >
-            <div className="flex items-center justify-between pb-4 border-b border-[#263B3F]/12 mb-4">
-              <h3 className="text-base font-bold text-[#263B3F]">
-                {category.name}
-              </h3>
-              <button
-                type="button"
-                id="btn-close-mobile-filter"
-                onClick={() => setMobileFilterOpen(false)}
-                className="p-1.5 rounded-full hover:bg-white text-[#263B3F]"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="flex-grow overflow-y-auto pr-1">
-              <BrandFilter
-                brands={dynamicBrands}
-                selectedBrand={selectedBrand}
-                onSelectBrand={(brand) => {
-                  onSelectBrand(brand);
-                  setMobileFilterOpen(false);
-                }}
-                isMobileDrawer={true}
-              />
-            </div>
-
-            <div className="pt-4 border-t border-[#263B3F]/12 flex gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectBrand('all');
-                  setMobileFilterOpen(false);
-                }}
-                className="flex-1 py-2.5 px-3 rounded-lg border border-[#263B3F]/20 text-xs font-semibold text-[#263B3F] hover:bg-white"
-              >
-                重設全部
-              </button>
-              <button
-                type="button"
-                onClick={() => setMobileFilterOpen(false)}
-                className="flex-1 py-2.5 px-3 rounded-lg bg-[#438DB8] text-white text-xs font-semibold shadow-xs"
-              >
-                完成
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

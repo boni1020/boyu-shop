@@ -197,11 +197,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </div>
 
             {/* Description */}
-            <div className="mb-5">
-              <p className="text-xs sm:text-sm text-[#263B3F]/80 leading-relaxed">
-                {product.description}
-              </p>
-            </div>
+            {Boolean(product.description && product.description.trim()) && (
+              <div className="mb-5">
+                <p className="text-xs sm:text-sm text-[#263B3F]/80 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+            )}
 
             {/* Product Variants Selector */}
             {product.variants && product.variants.length > 0 && (

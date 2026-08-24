@@ -17,10 +17,10 @@ export const CartView: React.FC<CartViewProps> = ({
 }) => {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, cartItemCount } = useCart();
 
-  const freeShippingThreshold = 1500;
+  const freeShippingThreshold = 2000;
   const isFreeShipping = cartTotal >= freeShippingThreshold;
   const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
-  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 80;
+  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 60;
   const finalTotal = cartTotal + shippingFee;
 
   if (cart.length === 0) {
@@ -32,9 +32,6 @@ export const CartView: React.FC<CartViewProps> = ({
         <h2 className="text-2xl font-bold text-[#263B3F] font-serif-brand mb-2">
           您的購物車目前是空的
         </h2>
-        <p className="text-sm text-[#263B3F]/70 max-w-md mx-auto mb-8">
-          探索來自澳洲海岸與山脈的純淨選物，將日光、沙灘與植萃日常帶入生活。
-        </p>
         <button
           type="button"
           id="btn-cart-empty-explore"
@@ -57,7 +54,7 @@ export const CartView: React.FC<CartViewProps> = ({
             購物車清單
           </h1>
           <p className="text-xs sm:text-sm text-[#263B3F]/60 mt-1">
-            共選購了 <span className="font-semibold text-[#438DB8]">{cartItemCount}</span> 件澳洲海岸選物
+            共選購了 <span className="font-semibold text-[#438DB8]">{cartItemCount}</span> 件
           </p>
         </div>
         <button
@@ -76,15 +73,15 @@ export const CartView: React.FC<CartViewProps> = ({
             <Truck className="w-4 h-4 text-[#438DB8]" />
             {isFreeShipping ? (
               <span className="text-[#2B8D9C] font-semibold">
-                恭喜！您的訂單已達 NT$ 1,500 免運門檻
+                恭喜！您的訂單已達 NT$ 2,000 免運門檻
               </span>
             ) : (
               <span>
-                再消費 <span className="font-bold text-[#438DB8]">NT$ {remainingForFreeShipping.toLocaleString()}</span> 即享全台免運
+                再消費 <span className="font-bold text-[#438DB8]">NT$ {remainingForFreeShipping.toLocaleString()}</span> 即享免運
               </span>
             )}
           </div>
-          <span className="text-[11px] text-[#263B3F]/50">滿 NT$ 1,500 免運</span>
+          <span className="text-[11px] text-[#263B3F]/50">滿 NT$ 2,000 免運</span>
         </div>
         <div className="w-full bg-[#F6F3EA] h-2 rounded-full overflow-hidden">
           <div
@@ -254,7 +251,6 @@ export const CartView: React.FC<CartViewProps> = ({
                   <span className="text-2xl font-bold text-[#438DB8]">
                     NT$ {finalTotal.toLocaleString()}
                   </span>
-                  <div className="text-[10px] text-[#263B3F]/50">含稅及全台配送</div>
                 </div>
               </div>
             </div>

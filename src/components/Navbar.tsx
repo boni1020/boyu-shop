@@ -61,6 +61,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     e.preventDefault();
     if (searchQuery.trim()) {
       onSearch(searchQuery.trim());
+      setSearchQuery('');
       setSearchFocused(false);
       setIsSearchOpen(false);
     }
@@ -85,11 +86,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       <header className="sticky top-0 z-40 w-full bg-[#F6F3EA]/95 backdrop-blur-md border-b border-[#263B3F]/10 shadow-[0_1px_12px_rgba(38,59,63,0.03)]">
         {/* Top Announcement Bar - Primary #438DB8 */}
         <div className="bg-[#438DB8] text-white text-[11px] py-1.5 px-4 text-center tracking-wider font-light flex items-center justify-center gap-3">
-          <span className="hidden sm:inline opacity-90 font-medium">AUSTRALIAN COASTAL NATURE</span>
-          <span className="hidden sm:inline opacity-40">•</span>
-          <span className="flex items-center gap-1.5 text-white">
+                  <span className="flex items-center gap-1.5 text-white">
             <Sparkles className="w-3 h-3 text-[#FFB94B]" />
-            單筆消費滿 NT$ 1,500 即享全台免運 ｜ 來自澳洲海岸與山脈的純淨日常
+            單筆消費滿 NT$ 2,000 即享全台免運 ｜ 來自澳洲的純淨日常
           </span>
         </div>
 
@@ -121,13 +120,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors">
                     波嶼
                   </span>
-                  <span className="text-xs font-semibold tracking-[0.25em] text-[#438DB8] uppercase">
-                    BO YU
+                  <span className="text-xs font-semibold tracking-[0.25em] text-[#438DB8]">
+                    BoYu
                   </span>
                 </div>
-                <span className="text-[10px] tracking-widest text-[#263B3F]/60 uppercase font-light -mt-0.5">
-                  Australian Coastal Nature
-                </span>
               </button>
             </div>
 
@@ -144,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
-                  placeholder="搜尋商品名稱、品牌（如 Bondi Wash、尤加利）..."
+                  placeholder="搜尋商品名稱、品牌（如 魚油、膠原蛋白）..."
                   className="w-full pl-9 pr-10 py-2 rounded-full bg-white border border-[#263B3F]/15 text-xs text-[#263B3F] placeholder:text-[#263B3F]/45 focus:outline-hidden focus:border-[#438DB8] focus:ring-2 focus:ring-[#438DB8]/20 transition-all"
                 />
                 <Search className="w-4 h-4 text-[#263B3F]/40 absolute left-3 top-2.5 pointer-events-none" />
@@ -170,7 +166,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="text-[10px] text-[#263B3F]/50">按 Enter 送出全站搜尋</span>
                   </div>
 
-                  {quickSuggestions.length > 0 ? (
+                  {/* quickSuggestions */}
+                  {/* {quickSuggestions.length > 0 ? (
                     <div className="divide-y divide-[#263B3F]/6">
                       {quickSuggestions.map((prod) => (
                         <div
@@ -203,11 +200,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="p-4 text-center text-xs text-[#263B3F]/60">
                       無即時推薦，按 Enter 送出進行模糊搜尋
                     </div>
-                  )}
+                  )} */}
 
                   <div
                     onClick={() => {
                       onSearch(searchQuery);
+                      setSearchQuery('');
                       setSearchFocused(false);
                     }}
                     className="p-2.5 bg-[#438DB8] text-white text-xs font-medium text-center hover:bg-[#438DB8]/90 cursor-pointer transition-colors"
