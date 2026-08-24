@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Category, Product } from '../types';
+import { supabase } from '../services/supabase';
 
 interface CategoryContextType {
   categories: Category[];
@@ -60,11 +61,19 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/categories');
-      if (!response.ok) {
-        throw new Error(`伺服器回應錯誤 (${response.status})`);
+      if (!supabase) {
+        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_PUBLISHABLE_KEY 設定');
       }
-      const rawData = await response.json();
+
+      const { data: rawData, error: supabaseError } = await supabase
+        .from('categories')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
 
       if (!Array.isArray(rawData)) {
         throw new Error('回傳之分類資料格式不符');

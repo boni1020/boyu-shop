@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Brand, Category, CategoryId, ProductVariant } from '../types';
+import { supabase } from '../services/supabase';
 
 interface ProductContextType {
   products: Product[];
@@ -165,37 +166,108 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsLoading(true);
     setError(null);
     try {
-      const [productsRes, brandsRes] = await Promise.all([
-        fetch('/api/products'),
-        fetch('/api/brands'),
+      if (!supabase) {
+        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_PUBLISHABLE_KEY 設定');
+      }
+
+      // Fetch products, product variants, and brands in parallel directly from Supabase
+      const [productsRes, variantsRes, brandsRes] = await Promise.all([
+        supabase
+          .from('products')
+          .select(`
+            *,
+            categories (*),
+            brands (*)
+          `)
+          .eq('is_active', true),
+        supabase
+          .from('product_variants')
+          .select(`
+            id,
+            product_id,
+            name,
+            weight,
+            price,
+            original_price,
+            clearance_price,
+            is_new,
+            is_sale,
+            option_values,
+            is_active
+          `)
+          .eq('is_active', true),
+        supabase
+          .from('brands')
+          .select('*')
+          .eq('is_active', true),
       ]);
 
-      if (!productsRes.ok) {
-        throw new Error(`商品 API 伺服器錯誤 (${productsRes.status})`);
+      if (productsRes.error) {
+        throw new Error(`無法取得商品資料: ${productsRes.error.message}`);
       }
-      if (!brandsRes.ok) {
-        throw new Error(`品牌 API 伺服器錯誤 (${brandsRes.status})`);
-      }
-
-      const rawProducts = await productsRes.json();
-      const rawBrands = await brandsRes.json();
-
-      if (!Array.isArray(rawProducts)) {
-        throw new Error('回傳之商品資料格式不符');
+      if (brandsRes.error) {
+        throw new Error(`無法取得品牌資料: ${brandsRes.error.message}`);
       }
 
-      const formattedProducts = rawProducts.map(mapSupabaseProduct);
-      const formattedBrands: Brand[] = Array.isArray(rawBrands)
-        ? rawBrands.map((b: any) => ({
-            id: String(b.id),
-            name: b.name,
-            slug: b.slug || String(b.id),
-            description: b.description || null,
-            img: b.img || null,
-            logo_url: b.img || null,
-            is_active: b.is_active ?? true,
-          }))
-        : [];
+      const rawProducts = productsRes.data || [];
+      const rawVariants = variantsRes.data || [];
+      const rawBrands = brandsRes.data || [];
+
+      // Group variants by product_id
+      const variantsByProductId = new Map<string, any[]>();
+      for (const variant of rawVariants) {
+        const pId = String(variant.product_id);
+        if (!variantsByProductId.has(pId)) {
+          variantsByProductId.set(pId, []);
+        }
+        variantsByProductId.get(pId)!.push({
+          id: String(variant.id),
+          product_id: String(variant.product_id),
+          name: variant.name || '',
+          weight: variant.weight != null ? Number(variant.weight) : null,
+          price: variant.price != null ? Number(variant.price) : 0,
+          original_price: variant.original_price != null ? Number(variant.original_price) : null,
+          clearance_price: variant.clearance_price != null ? Number(variant.clearance_price) : null,
+          is_new: Boolean(variant.is_new),
+          is_sale: Boolean(variant.is_sale),
+          option_values: variant.option_values || null,
+        });
+      }
+
+      // Hydrate raw products with their variants
+      const hydratedRawProducts = rawProducts.map((prod: any) => ({
+        ...prod,
+        id: String(prod.id),
+        name: prod.name || '',
+        description: prod.description || null,
+        brand_id: prod.brand_id ? String(prod.brand_id) : null,
+        category_id: prod.category_id ? String(prod.category_id) : null,
+        price: prod.price != null ? Number(prod.price) : 0,
+        original_price: prod.original_price != null ? Number(prod.original_price) : null,
+        clearance_price: prod.clearance_price != null ? Number(prod.clearance_price) : null,
+        img: prod.img || null,
+        hover_img: prod.hover_img || null,
+        weight: prod.weight != null ? Number(prod.weight) : null,
+        expiry_date: prod.expiry_date || null,
+        origin: prod.origin || null,
+        is_active: Boolean(prod.is_active),
+        is_new: Boolean(prod.is_new),
+        is_sale: Boolean(prod.is_sale),
+        categories: prod.categories || null,
+        brands: prod.brands || null,
+        product_variants: variantsByProductId.get(String(prod.id)) || [],
+      }));
+
+      const formattedProducts = hydratedRawProducts.map(mapSupabaseProduct);
+      const formattedBrands: Brand[] = rawBrands.map((b: any) => ({
+        id: String(b.id),
+        name: b.name,
+        slug: b.slug || String(b.id),
+        description: b.description || null,
+        img: b.img || null,
+        logo_url: b.img || null,
+        is_active: b.is_active ?? true,
+      }));
 
       setProducts(formattedProducts);
       setBrands(formattedBrands);
