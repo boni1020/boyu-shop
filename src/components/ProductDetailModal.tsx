@@ -173,7 +173,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
             </h2>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3 mb-4">
+            <div className="flex items-baseline gap-3 mb-4 flex-wrap">
               <span className="text-2xl font-bold text-[#438DB8]">
                 NT$ {activePrice.toLocaleString()}
               </span>
@@ -182,11 +182,18 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   NT$ {activeOriginalPrice.toLocaleString()}
                 </span>
               )}
-              {activeWeight && (
-                <span className="text-xs text-[#263B3F]/60 ml-auto bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
-                  重量：{activeWeight}
-                </span>
-              )}
+              <div className="flex items-center gap-2 ml-auto flex-wrap">
+                {activeWeight && (
+                  <span className="text-xs text-[#263B3F]/60 bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
+                    重量：{activeWeight}
+                  </span>
+                )}
+                {product.expiryDate && (
+                  <span className="text-xs text-[#263B3F]/60 bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
+                    有效期限：{product.expiryDate}
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -211,7 +218,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="flex flex-col gap-2">
                   {product.variants.map((v) => {
                     const isSelected = selectedVariant?.id === v.id;
                     const vPrice = getVariantEffectivePrice(v);

@@ -4,10 +4,9 @@ import { useCart } from '../context/CartContext';
 import {
   getProductEffectivePrice,
   getProductOriginalPrice,
-  isItemOnSale,
   isItemNew,
 } from '../utils/priceUtils';
-import { MapPin, Sparkles, Tag, Eye, ShoppingBag, Check } from 'lucide-react';
+import { MapPin, Sparkles, Eye, ShoppingBag, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -23,13 +22,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   // Variant-based price calculations
   const effectivePrice = getProductEffectivePrice(product);
   const effectiveOriginalPrice = getProductOriginalPrice(product);
-  const onSale = isItemOnSale(product);
   const isNew = isItemNew(product);
 
   const hasDiscount = effectiveOriginalPrice != null && effectiveOriginalPrice > effectivePrice;
-  const discountPercent = hasDiscount
-    ? Math.round(((effectiveOriginalPrice! - effectivePrice) / effectiveOriginalPrice!) * 100)
-    : 0;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,12 +83,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
               新品
             </span>
           )}
-          {hasDiscount && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-[#FFB94B] text-[#263B3F] shadow-sm tracking-wider">
-              <Tag className="w-3 h-3" />
-              省 {discountPercent}%
-            </span>
-          )}
         </div>
 
         {/* Action Overlay on Desktop Hover */}
@@ -109,29 +98,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
           >
             <Eye className="w-3.5 h-3.5" />
             <span>查看細節</span>
-          </button>
-
-          <button
-            type="button"
-            id={`btn-card-add-to-cart-${product.id}`}
-            onClick={handleQuickAdd}
-            className={`flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-full shadow-md backdrop-blur-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 cursor-pointer ${
-              added
-                ? 'bg-[#2B8D9C] text-white'
-                : 'bg-[#438DB8] hover:bg-[#438DB8]/90 text-white'
-            }`}
-          >
-            {added ? (
-              <>
-                <Check className="w-3.5 h-3.5" />
-                <span>已加入</span>
-              </>
-            ) : (
-              <>
-                <ShoppingBag className="w-3.5 h-3.5" />
-                <span>加入購物車</span>
-              </>
-            )}
           </button>
         </div>
       </div>
@@ -161,7 +127,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
 
         {/* Price & Mobile Add to Cart */}
         <div className="mt-auto pt-3 border-t border-[#263B3F]/8 flex items-center justify-between gap-2">
-          <div className="flex items-baseline gap-2">
+          <div className="flex flex-col">
             <span className="text-base md:text-lg font-bold text-[#263B3F] tracking-tight">
               NT$ {effectivePrice.toLocaleString()}
             </span>

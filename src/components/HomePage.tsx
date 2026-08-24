@@ -452,11 +452,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               referrerPolicy="no-referrer"
                             />
-                            <div className="absolute top-2 left-2">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-bold bg-[#FFB94B] text-[#263B3F] shadow-xs">
-                                特價出清
-                              </span>
-                            </div>
                           </div>
 
                           {/* Brand & Name */}
