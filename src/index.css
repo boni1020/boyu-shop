@@ -9,14 +9,13 @@
     --color-bg: #F6F3EA;
   }
 
-  body {
+  *, body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, .font-serif-brand {
     font-family: 'Plus Jakarta Sans', 'Noto Sans TC', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #F6F3EA;
-    color: #263B3F;
   }
 
-  h1, h2, h3, .font-serif-brand {
-    font-family: 'Cormorant Garamond', 'Noto Serif TC', Georgia, serif;
+  body {
+    background-color: #F6F3EA;
+    color: #263B3F;
   }
 }
 

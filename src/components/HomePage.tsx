@@ -37,17 +37,9 @@ export const HomePage: React.FC<HomePageProps> = ({
     refetchProducts();
   };
 
-  // 1. New Arrival Products for Section 1
+  // 1. New Arrival Products for Section 1 (Strict isNewArrival === true)
   const newArrivals = React.useMemo(() => {
-    const list = allProducts.filter(
-      (p) =>
-        p.isNewArrival ||
-        p.categoryId === 'new-arrivals' ||
-        p.categorySlug === 'new' ||
-        p.categoryName.includes('新品')
-    );
-    // If no explicit isNewArrival tagged, show first 6 products
-    return (list.length > 0 ? list : allProducts).slice(0, 6);
+    return allProducts.filter((p) => p.isNewArrival === true).slice(0, 6);
   }, [allProducts]);
 
   // 2. Curated Categories for Section 3 (All active EXCEPT clearance)
@@ -56,21 +48,14 @@ export const HomePage: React.FC<HomePageProps> = ({
       (c) =>
         c.slug !== 'clearance' &&
         c.slug !== 'sale' &&
-        !c.name.includes('清倉')
+        !c.name.includes('清倉') &&
+        !c.name.includes('出清')
     );
   }, [categories]);
 
-  // 3. Clearance Products for Section 4
+  // 3. Clearance Products for Section 4 (Strict isClearance === true)
   const clearanceProducts = React.useMemo(() => {
-    const list = allProducts.filter(
-      (p) =>
-        p.isClearance ||
-        p.categoryId === 'clearance' ||
-        p.categorySlug === 'sale' ||
-        p.categoryName.includes('清倉') ||
-        (p.originalPrice && p.originalPrice > p.price)
-    );
-    return list.slice(0, 2);
+    return allProducts.filter((p) => p.isClearance === true).slice(0, 2);
   }, [allProducts]);
 
   // Target ID for explore button
@@ -131,11 +116,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-white w-full">
           <div className="max-w-2xl">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white font-serif-brand leading-[1.15] mb-6">
-              拾起澳洲的純淨日常
+              把澳洲的陽光與日常，打包寄給你
             </h1>
 
             <p className="text-sm md:text-base text-white/90 leading-relaxed max-w-xl mb-8 font-light">
-              波嶼將南半球不受拘束的純淨生活感，化為溫潤日常
+              波波嚴選南半球純淨好物，保健補給、有機美食與日常保養，輕鬆直送你家！
             </p>
 
             <div className="flex items-center gap-4">
@@ -145,7 +130,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 onClick={() => onSelectCategory(exploreCategoryId)}
                 className="px-7 py-3.5 rounded-full bg-[#438DB8] text-white text-xs md:text-sm font-semibold shadow-lg hover:bg-[#438DB8]/90 transition-all flex items-center gap-2 group cursor-pointer"
               >
-                <span>前往生活補給</span>
+                <span>逛逛生活補給專區</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -170,7 +155,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               新品上市
             </h2>
             <p className="text-xs sm:text-sm text-[#263B3F]/70 mt-1">
-              本季最新抵台的澳洲選物
+              剛從澳洲搭飛機來台的最新好物！
             </p>
           </div>
 
@@ -185,7 +170,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             }}
             className="text-xs font-semibold text-[#438DB8] hover:underline flex items-center gap-1 self-start sm:self-auto cursor-pointer"
           >
-            <span>查看全部新品上市</span>
+            <span>看更多最新好物</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -204,7 +189,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
         ) : newArrivals.length === 0 ? (
           <div className="py-12 text-center bg-white/60 border border-[#263B3F]/10 rounded-xl">
-            <p className="text-[#263B3F]/70 text-sm">目前尚無新品上架</p>
+            <p className="text-[#263B3F]/70 text-sm">目前尚無新上架的好物</p>
           </div>
         ) : (
           /* Products Grid: Desktop 6 cols | Tablet 3 cols | Mobile 2 cols */
@@ -244,10 +229,10 @@ export const HomePage: React.FC<HomePageProps> = ({
               AUSTRALIAN PANTRY & GOURMET
             </span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-serif-brand leading-tight mb-4 text-white">
-              食光選物：品嚐南半球的陽光與豐饒大地
+              澳洲食光：嚐嚐南半球的陽光滋味
             </h2>
             <p className="text-xs sm:text-sm md:text-base text-white/85 leading-relaxed mb-8 max-w-xl font-light">
-              原生麥蘆卡蜂蜜、澳洲有機堅果，點亮每一日的餐桌食光。
+              原生麥蘆卡蜂蜜、有機堅果與純淨零食，把美味又健康的澳洲好味道搬上餐桌！
             </p>
 
             <button
@@ -256,15 +241,15 @@ export const HomePage: React.FC<HomePageProps> = ({
               onClick={() => onSelectCategory(foodCategoryId)}
               className="px-8 py-3.5 rounded-full bg-[#FFB94B] text-[#263B3F] text-xs md:text-sm font-bold shadow-md hover:bg-[#FFB94B]/90 transition-all flex items-center gap-2 cursor-pointer"
             >
-              <span>探索食光選物</span>
+              <span>來去逛食光選物</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           <div className="hidden lg:flex flex-col gap-3 bg-black/25 backdrop-blur-md p-6 rounded-none border border-white/15 text-xs text-white/90 max-w-sm">
-            <div className="font-semibold text-[#FFB94B] text-sm">純粹天然 ∙ 無人工添加</div>
+            <div className="font-semibold text-[#FFB94B] text-sm">純粹天然 ∙ 無多餘添加</div>
             <p className="text-white/75 leading-relaxed">
-              嚴選澳洲在地純淨生產，讓每一口都嚐得到純粹的自然原味。
+              波波每週嚴選澳洲在地純淨美味，讓全家人吃得開心又安心。
             </p>
           </div>
         </div>
@@ -279,10 +264,10 @@ export const HomePage: React.FC<HomePageProps> = ({
             CURATED CATEGORIES
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#263B3F] font-serif-brand">
-            探索澳洲選物
+            精選澳洲主題專區
           </h2>
           <p className="text-xs md:text-sm text-[#263B3F]/70 mt-1">
-            南半球的自然與生活的風格主題
+            分類逛逛最想入手的澳洲好物
           </p>
         </div>
 
@@ -382,11 +367,11 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold font-serif-brand mb-4 text-white">
-                清倉特價
+                限量出清特惠
               </h2>
 
               <p className="text-sm md:text-base text-white/80 leading-relaxed mb-6 font-light max-w-md mx-auto lg:mx-0">
-                限量選物，售完為止。換季與典藏庫存出清，以最心動價格收藏純淨生活。
+                現貨搶便宜！超值出清好物數量有限，賣完就沒有囉～
               </p>
 
               <button
@@ -395,7 +380,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 onClick={() => onSelectCategory(clearanceCatId)}
                 className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-[#FFB94B] text-[#263B3F] text-xs sm:text-sm font-bold shadow-md hover:bg-[#FFB94B]/90 transition-all cursor-pointer"
               >
-                <span>查看全部特惠選物</span>
+                <span>搶看全部出清好物</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -410,8 +395,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </div>
               ) : clearanceProducts.length === 0 ? (
                 <div className="bg-white/10 backdrop-blur-sm border border-white/15 rounded-2xl p-8 text-center text-white/80">
-                  <p className="text-sm font-medium">目前清倉專區暫無出清選物</p>
-                  <p className="text-xs text-white/60 mt-1">歡迎隨時瀏覽其他分類商品</p>
+                  <p className="text-sm font-medium">目前清倉專區暫無出清好物</p>
+                  <p className="text-xs text-white/60 mt-1">歡迎隨時逛逛其他分類好物</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-4 sm:gap-6">

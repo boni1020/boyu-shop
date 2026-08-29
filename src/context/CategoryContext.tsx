@@ -142,6 +142,17 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         category = categoryOrId;
       }
 
+      const catSlug = (category?.slug || (typeof categoryOrId === 'string' ? categoryOrId : '')).toLowerCase();
+      const catName = category?.name || (typeof categoryOrId === 'string' ? categoryOrId : '');
+
+      // Special category handling
+      if (catSlug === 'new' || catSlug === 'new-arrivals' || catName.includes('新品')) {
+        return product.isNewArrival === true;
+      }
+      if (catSlug === 'sale' || catSlug === 'clearance' || catName.includes('清倉') || catName.includes('出清') || catName.includes('特價')) {
+        return product.isClearance === true;
+      }
+
       if (!category) {
         return (
           product.categoryId === categoryOrId ||

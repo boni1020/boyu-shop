@@ -1,6 +1,6 @@
 {
-  "name": "波嶼 BoYu | 澳洲生活選物",
-  "description": "波嶼選物 - 來自澳洲自然生活選物",
+  "name": "波波澳洲代購",
+  "description": "波波澳洲代購 - 來自澳洲的日常好物",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

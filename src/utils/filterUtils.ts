@@ -22,23 +22,23 @@ export function matchesCategory(
     catSlug = (categoryOrId.slug || '').toLowerCase();
   }
 
-  // 1. Direct ID / UUID match
-  if (product.categoryId && catId && product.categoryId === catId) return true;
-
-  // 2. Direct Name match
-  if (product.categoryName && catName && product.categoryName === catName) return true;
-
-  // 3. Slug match
-  if (product.categorySlug && catSlug && product.categorySlug.toLowerCase() === catSlug) return true;
-  if (product.categoryId && catSlug && product.categoryId.toLowerCase() === catSlug) return true;
-
-  // 4. Special category handling
+  // 1. Special category handling FIRST
   if (catSlug === 'new' || catSlug === 'new-arrivals' || catName.includes('新品')) {
     return isItemNew(product);
   }
-  if (catSlug === 'sale' || catSlug === 'clearance' || catName.includes('清倉') || catName.includes('特價')) {
+  if (catSlug === 'sale' || catSlug === 'clearance' || catName.includes('清倉') || catName.includes('出清') || catName.includes('特價')) {
     return isItemOnSale(product);
   }
+
+  // 2. Direct ID / UUID match
+  if (product.categoryId && catId && product.categoryId === catId) return true;
+
+  // 3. Direct Name match
+  if (product.categoryName && catName && product.categoryName === catName) return true;
+
+  // 4. Slug match
+  if (product.categorySlug && catSlug && product.categorySlug.toLowerCase() === catSlug) return true;
+  if (product.categoryId && catSlug && product.categoryId.toLowerCase() === catSlug) return true;
 
   return false;
 }

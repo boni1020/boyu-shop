@@ -86,9 +86,9 @@ export const Navbar: React.FC<NavbarProps> = ({
       <header className="sticky top-0 z-40 w-full bg-[#F6F3EA]/95 backdrop-blur-md border-b border-[#263B3F]/10 shadow-[0_1px_12px_rgba(38,59,63,0.03)]">
         {/* Top Announcement Bar - Primary #438DB8 */}
         <div className="bg-[#438DB8] text-white text-[11px] py-1.5 px-4 text-center tracking-wider font-light flex items-center justify-center gap-3">
-                  <span className="flex items-center gap-1.5 text-white">
+          <span className="flex items-center gap-1.5 text-white">
             <Sparkles className="w-3 h-3 text-[#FFB94B]" />
-            單筆消費滿 NT$ 2,000 即享全台免運 ｜ 來自澳洲的純淨日常
+            單筆消費滿 NT$ 2,000 即享全台免運 ｜ 把澳洲好物帶進你的可愛日常
           </span>
         </div>
 
@@ -118,10 +118,10 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <div className="flex items-baseline gap-2">
                   <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors">
-                    波嶼
+                    波波澳洲代購
                   </span>
-                  <span className="text-xs font-semibold tracking-[0.25em] text-[#438DB8]">
-                    BoYu
+                  <span className="text-xs font-semibold tracking-[0.2em] text-[#438DB8]">
+                    BoBo AU
                   </span>
                 </div>
               </button>
@@ -140,7 +140,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
-                  placeholder="搜尋商品名稱、品牌（如 魚油、膠原蛋白）..."
+                  placeholder="搜尋想找的澳洲好物、品牌（如 魚油、膠原蛋白）..."
                   className="w-full pl-9 pr-10 py-2 rounded-full bg-white border border-[#263B3F]/15 text-xs text-[#263B3F] placeholder:text-[#263B3F]/45 focus:outline-hidden focus:border-[#438DB8] focus:ring-2 focus:ring-[#438DB8]/20 transition-all"
                 />
                 <Search className="w-4 h-4 text-[#263B3F]/40 absolute left-3 top-2.5 pointer-events-none" />
@@ -393,10 +393,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center justify-between pb-4 border-b border-[#263B3F]/12 mb-6">
               <div>
                 <span className="text-xl font-bold text-[#263B3F] font-serif-brand">
-                  波嶼 BoYu
+                  波波澳洲代購
                 </span>
                 <span className="block text-[10px] text-[#438DB8] uppercase tracking-widest font-medium">
-                  Australian Coastal Nature
+                  BoBo Australia
                 </span>
               </div>
               <button
@@ -498,7 +498,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 }}
                 className="text-xs font-medium text-[#438DB8] hover:underline cursor-pointer"
               >
-                返回波嶼首頁 →
+                返回代購首頁 →
               </button>
             </div>
           </div>

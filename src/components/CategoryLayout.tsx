@@ -3,7 +3,7 @@ import { Category, Product, CategoryId } from '../types';
 import { BrandFilter } from './BrandFilter';
 import { ProductCard } from './ProductCard';
 import { getBrandsForCategory, filterProducts, matchesCategory } from '../utils/filterUtils';
-import { ChevronRight, ArrowUpDown, Sparkles } from 'lucide-react';
+import { ChevronRight, ArrowUpDown, ShoppingCart } from 'lucide-react';
 
 interface CategoryLayoutProps {
   category: Category;
@@ -149,21 +149,18 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
               /* Empty State */
               <div className="py-16 px-4 text-center bg-white/60 rounded-2xl border border-dashed border-[#263B3F]/20">
                 <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-[#438DB8]/10 text-[#438DB8] flex items-center justify-center">
-                  <Sparkles className="w-6 h-6" />
+                  <ShoppingCart className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-semibold text-[#263B3F] mb-1">
-                  目前在「{category.name}」找不到「{selectedBrand}」的商品
+                <h3 className="text-base font-semibold text-[#263B3F] mb-6">
+                  目前沒有「{category.name}」的商品
                 </h3>
-                <p className="text-xs text-[#263B3F]/60 max-w-md mx-auto mb-6 leading-relaxed">
-                  該品牌可能僅於其他分類中有提供選物，或目前此分類無該品牌商品。
-                </p>
                 <button
                   type="button"
-                  id="btn-empty-reset-brand"
-                  onClick={() => onSelectBrand('all')}
-                  className="px-5 py-2.5 bg-[#438DB8] text-white text-xs font-semibold rounded-lg shadow-sm hover:bg-[#438DB8]/90 transition-colors"
+                  id="btn-empty-navigate-home"
+                  onClick={onNavigateHome}
+                  className="px-5 py-2.5 bg-[#438DB8] text-white text-xs font-semibold rounded-lg shadow-sm hover:bg-[#438DB8]/90 transition-colors cursor-pointer"
                 >
-                  查看「{category.name}」全部商品
+                  回首頁
                 </button>
               </div>
             )}
