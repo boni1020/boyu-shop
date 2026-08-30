@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# 波嶼 Boyu Shop
+# 波波澳洲代購 Bobo Shop
 
 澳洲商品選物與代購網站。
 以 React + TypeScript + Vite 建置，提供商品瀏覽、分類導覽與商品詳細資訊等核心功能。

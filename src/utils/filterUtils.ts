@@ -11,6 +11,7 @@ export function matchesCategory(
   let catId = '';
   let catName = '';
   let catSlug = '';
+  let catType: 'new' | 'regular' | 'sale' | undefined;
 
   if (typeof categoryOrId === 'string') {
     catId = categoryOrId;
@@ -20,25 +21,53 @@ export function matchesCategory(
     catId = categoryOrId.id || '';
     catName = categoryOrId.name || '';
     catSlug = (categoryOrId.slug || '').toLowerCase();
+    catType = categoryOrId.type;
   }
 
-  // 1. Special category handling FIRST
-  if (catSlug === 'new' || catSlug === 'new-arrivals' || catName.includes('新品')) {
+  // 1. 動態專區：新品上市 (product.is_new === true)
+  if (
+    catType === 'new' ||
+    catSlug === 'new' ||
+    catSlug === 'new-arrivals' ||
+    catId === 'new-arrivals' ||
+    catName === '新品上市'
+  ) {
     return isItemNew(product);
   }
-  if (catSlug === 'sale' || catSlug === 'clearance' || catName.includes('清倉') || catName.includes('出清') || catName.includes('特價')) {
+
+  // 2. 動態專區：限時特價 (product.is_sale === true)
+  if (
+    catType === 'sale' ||
+    catSlug === 'sale' ||
+    catSlug === 'clearance' ||
+    catId === 'sale' ||
+    catId === 'clearance' ||
+    catName === '限時特價' ||
+    catName.includes('特價') ||
+    catName.includes('清倉') ||
+    catName.includes('出清')
+  ) {
     return isItemOnSale(product);
   }
 
-  // 2. Direct ID / UUID match
-  if (product.categoryId && catId && product.categoryId === catId) return true;
+  // 3. 一般商品主分類 (五個一般分類: product.category_id === category.id)
+  // Direct UUID or ID match
+  if (product.categoryId && catId && String(product.categoryId) === String(catId)) {
+    return true;
+  }
 
-  // 3. Direct Name match
-  if (product.categoryName && catName && product.categoryName === catName) return true;
+  // Direct Name match
+  if (product.categoryName && catName && product.categoryName === catName) {
+    return true;
+  }
 
-  // 4. Slug match
-  if (product.categorySlug && catSlug && product.categorySlug.toLowerCase() === catSlug) return true;
-  if (product.categoryId && catSlug && product.categoryId.toLowerCase() === catSlug) return true;
+  // Slug match
+  if (product.categorySlug && catSlug && product.categorySlug.toLowerCase() === catSlug) {
+    return true;
+  }
+  if (product.categoryId && catSlug && String(product.categoryId).toLowerCase() === catSlug) {
+    return true;
+  }
 
   return false;
 }

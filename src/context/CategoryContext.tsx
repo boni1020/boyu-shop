@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { Category, Product } from '../types';
+import { Category, Product, CategoryType } from '../types';
 import { supabase } from '../services/supabase';
+import { matchesCategory } from '../utils/filterUtils';
 
 interface CategoryContextType {
   categories: Category[];
@@ -45,9 +46,14 @@ const CATEGORY_DEFAULT_IMAGES: Record<string, { hero: string; english: string; d
     english: 'FOOD & PANTRY',
     desc: '塔斯馬尼亞珍稀蜂蜜、野生堅果醬與無添加莊園美味。',
   },
+  '限時特價': {
+    hero: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1800&q=80',
+    english: 'SPECIAL OFFERS',
+    desc: '限量現貨倒數，專屬優惠探索澳洲純淨選品。',
+  },
   '清倉特價': {
     hero: 'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1800&q=80',
-    english: 'SPECIAL CLEARANCE',
+    english: 'SPECIAL OFFERS',
     desc: '限量現貨倒數，專屬優惠探索澳洲純淨選品。',
   },
 };
@@ -62,7 +68,7 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setError(null);
     try {
       if (!supabase) {
-        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_PUBLISHABLE_KEY 設定');
+        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY 設定');
       }
 
       const { data: rawData, error: supabaseError } = await supabase
@@ -79,7 +85,7 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error('回傳之分類資料格式不符');
       }
 
-      const formattedCategories: Category[] = rawData.map((item: any) => {
+      const formattedSupabaseCategories: Category[] = rawData.map((item: any) => {
         const fallbackMeta = CATEGORY_DEFAULT_IMAGES[item.name] || {
           hero: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80',
           english: item.slug ? item.slug.toUpperCase() : 'AUSTRALIAN LIVING',
@@ -90,6 +96,7 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           id: String(item.id),
           name: item.name,
           slug: item.slug || String(item.id),
+          type: 'regular' as CategoryType,
           sort_order: item.sort_order ?? 0,
           is_active: item.is_active ?? true,
           description: item.description || fallbackMeta.desc,
@@ -100,7 +107,46 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         };
       });
 
-      setCategories(formattedCategories);
+      // 7 個固定順序分類：
+      // 1. 新品上市 (動態專區, type: 'new')
+      // 2~6. Supabase 5 大商品主分類 (依 sort_order 排序: 生活補給, 精選美研, 舒適配飾, 日之選用, 食光選物)
+      // 7. 限時特價 (動態專區, type: 'sale')
+      const newArrivalsCategory: Category = {
+        id: 'new-arrivals',
+        name: '新品上市',
+        slug: 'new-arrivals',
+        type: 'new',
+        sort_order: -1,
+        is_active: true,
+        description: CATEGORY_DEFAULT_IMAGES['新品上市'].desc,
+        englishName: CATEGORY_DEFAULT_IMAGES['新品上市'].english,
+        story: '',
+        heroImage: CATEGORY_DEFAULT_IMAGES['新品上市'].hero,
+        image_url: null,
+      };
+
+      const saleCategory: Category = {
+        id: 'sale',
+        name: '限時特價',
+        slug: 'sale',
+        type: 'sale',
+        sort_order: 999,
+        is_active: true,
+        description: CATEGORY_DEFAULT_IMAGES['限時特價'].desc,
+        englishName: CATEGORY_DEFAULT_IMAGES['限時特價'].english,
+        story: '',
+        heroImage: CATEGORY_DEFAULT_IMAGES['限時特價'].hero,
+        image_url: null,
+      };
+
+      const allCategories: Category[] = [
+        newArrivalsCategory,
+        ...formattedSupabaseCategories,
+        saleCategory,
+      ];
+
+      console.log('[Supabase] categories (7 categories created)', allCategories);
+      setCategories(allCategories);
     } catch (err: any) {
       console.error('Failed to fetch categories from Supabase:', err);
       setError(err?.message || '無法從 Supabase 取得分類資料');
@@ -124,7 +170,11 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         (c) =>
           c.id === idOrSlug ||
           c.slug?.toLowerCase() === target ||
-          c.name === idOrSlug
+          c.name === idOrSlug ||
+          (target === 'new' && (c.type === 'new' || c.slug === 'new-arrivals')) ||
+          (target === 'new-arrivals' && (c.type === 'new' || c.slug === 'new-arrivals')) ||
+          (target === 'sale' && (c.type === 'sale' || c.slug === 'sale')) ||
+          (target === 'clearance' && (c.type === 'sale' || c.slug === 'sale'))
       );
     },
     [categories]
@@ -133,50 +183,9 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // Check if a product belongs to a given category
   const isProductInCategory = useCallback(
     (product: Product, categoryOrId: Category | string): boolean => {
-      if (!product || !categoryOrId) return false;
-
-      let category: Category | undefined;
-      if (typeof categoryOrId === 'string') {
-        category = getCategoryByIdOrSlug(categoryOrId);
-      } else {
-        category = categoryOrId;
-      }
-
-      const catSlug = (category?.slug || (typeof categoryOrId === 'string' ? categoryOrId : '')).toLowerCase();
-      const catName = category?.name || (typeof categoryOrId === 'string' ? categoryOrId : '');
-
-      // Special category handling
-      if (catSlug === 'new' || catSlug === 'new-arrivals' || catName.includes('新品')) {
-        return product.isNewArrival === true;
-      }
-      if (catSlug === 'sale' || catSlug === 'clearance' || catName.includes('清倉') || catName.includes('出清') || catName.includes('特價')) {
-        return product.isClearance === true;
-      }
-
-      if (!category) {
-        return (
-          product.categoryId === categoryOrId ||
-          product.categoryName === categoryOrId
-        );
-      }
-
-      // Check by category name match
-      if (product.categoryName && category.name && product.categoryName === category.name) {
-        return true;
-      }
-
-      // Check by direct ID or slug match
-      if (
-        product.categoryId === category.id ||
-        product.categoryId === category.slug ||
-        product.categorySlug === category.slug
-      ) {
-        return true;
-      }
-
-      return false;
+      return matchesCategory(product, categoryOrId);
     },
-    [getCategoryByIdOrSlug]
+    []
   );
 
   const value = useMemo(

@@ -8,10 +8,13 @@ export type CategoryId =
   | 'clearance'
   | (string & {});
 
+export type CategoryType = 'new' | 'regular' | 'sale';
+
 export interface Category {
   id: string;
   name: string; // The exact Chinese name
   slug?: string;
+  type?: CategoryType;
   description?: string | null;
   image_url?: string | null;
   sort_order?: number;
@@ -44,6 +47,8 @@ export interface ProductVariant {
   is_new: boolean;
   is_sale: boolean;
   option_values: Record<string, any> | null;
+  image?: string | null;
+  expiry_date?: string | null;
 }
 
 export interface ProductOption {

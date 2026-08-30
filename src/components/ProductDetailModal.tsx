@@ -65,16 +65,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const activeWeight = selectedVariant && selectedVariant.weight != null
     ? `${selectedVariant.weight} kg`
     : product.weight;
+  const activeExpiryDate = selectedVariant?.expiry_date || product.expiryDate;
 
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);
-  };
-
-  const handleOptionChange = (optionName: string, value: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [optionName]: value,
-    }));
+    if (variant.option_values) {
+      setSelectedOptions(variant.option_values);
+    }
   };
 
   const handleDecrease = () => {
@@ -86,7 +83,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   };
 
   const handleAddToCart = () => {
-    addToCart(product, quantity, selectedOptions, selectedVariant || undefined);
+    const options = selectedVariant?.option_values || selectedOptions;
+    addToCart(product, quantity, options, selectedVariant || undefined);
     setAddedFeedback(true);
     setTimeout(() => {
       setAddedFeedback(false);
@@ -116,7 +114,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
         {/* Left Column: Product Image */}
         <div className="md:w-1/2 relative bg-white min-h-[280px] md:min-h-[480px] flex items-center justify-center p-6 border-b md:border-b-0 md:border-r border-[#263B3F]/10">
           <img
-            src={product.imageUrl}
+            src={selectedVariant?.image || product.imageUrl}
             alt={product.name}
             className="w-full h-full max-h-[420px] object-contain transition-transform duration-500 hover:scale-105"
             referrerPolicy="no-referrer"
@@ -188,9 +186,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     重量：{activeWeight}
                   </span>
                 )}
-                {product.expiryDate && (
+                {activeExpiryDate && (
                   <span className="text-xs text-[#263B3F]/60 bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
-                    有效期限：{product.expiryDate}
+                    有效期限：{activeExpiryDate}
                   </span>
                 )}
               </div>
@@ -270,51 +268,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                     );
                   })}
                 </div>
-              </div>
-            )}
-
-            {/* Dynamic Product Options Selectors (e.g., 容量、香味、尺寸、規格) */}
-            {product.options && product.options.length > 0 && (
-              <div className="mb-6 space-y-4 bg-white/60 p-4 rounded-xl border border-[#263B3F]/10">
-                <div className="text-xs font-bold text-[#263B3F] tracking-wide flex items-center gap-1.5 uppercase">
-                  <span>其他選項</span>
-                </div>
-                {product.options.map((option) => {
-                  const currentSelected = selectedOptions[option.name] || option.values[0];
-                  return (
-                    <div key={option.name} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-medium text-[#263B3F]/80">
-                          {option.name}：
-                          <span className="font-semibold text-[#438DB8] ml-1">
-                            {currentSelected}
-                          </span>
-                        </span>
-                      </div>
-
-                      {/* Options values pills */}
-                      <div className="flex flex-wrap gap-2 pt-0.5">
-                        {option.values.map((val) => {
-                          const isSelected = currentSelected === val;
-                          return (
-                            <button
-                              key={val}
-                              type="button"
-                              onClick={() => handleOptionChange(option.name, val)}
-                              className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all duration-150 cursor-pointer border text-left ${
-                                isSelected
-                                  ? 'bg-[#438DB8] text-white border-[#438DB8] shadow-xs ring-2 ring-[#438DB8]/20'
-                                  : 'bg-white text-[#263B3F]/85 border-[#263B3F]/15 hover:border-[#438DB8]/60 hover:bg-[#F6F3EA]'
-                              }`}
-                            >
-                              {val}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
               </div>
             )}
           </div>

@@ -116,12 +116,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onNavigateHome}
                 className="group flex flex-col items-start text-left focus:outline-hidden cursor-pointer"
               >
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 leading-tight">
+                  <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors whitespace-nowrap">
                     波波澳洲代購
                   </span>
-                  <span className="text-xs font-semibold tracking-[0.2em] text-[#438DB8]">
-                    BoBo AU
+                  <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-[#438DB8] uppercase whitespace-nowrap">
+                    BoBo Australia
                   </span>
                 </div>
               </button>
@@ -298,11 +298,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                     (activeCategoryId === cat.id ||
                       activeCategoryId === cat.slug ||
                       activeCategoryId === cat.name);
-                  const isClearance =
+                  const isSale =
+                    cat.type === 'sale' ||
                     cat.slug === 'sale' ||
                     cat.slug === 'clearance' ||
+                    cat.name.includes('特價') ||
                     cat.name.includes('清倉');
                   const isNewArrival =
+                    cat.type === 'new' ||
                     cat.slug === 'new' ||
                     cat.slug === 'new-arrivals' ||
                     cat.name.includes('新品');
@@ -316,12 +319,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                       className={`relative px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                         isActive
                           ? 'bg-[#438DB8] text-white shadow-xs font-semibold'
-                          : isClearance
+                          : isSale
                           ? 'text-[#263B3F] bg-[#FFB94B]/20 hover:bg-[#FFB94B]/35 border border-[#FFB94B]/40 font-semibold'
                           : 'text-[#263B3F]/80 hover:text-[#263B3F] hover:bg-[#263B3F]/6'
                       }`}
                     >
-                      {isClearance && <Tag className="w-3.5 h-3.5 text-[#FFB94B]" />}
+                      {isSale && <Tag className="w-3.5 h-3.5 text-[#FFB94B]" />}
                       {isNewArrival && (
                         <Sparkles
                           className={`w-3 h-3 ${isActive ? 'text-white' : 'text-[#438DB8]'}`}
@@ -442,11 +445,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                   (activeCategoryId === cat.id ||
                     activeCategoryId === cat.slug ||
                     activeCategoryId === cat.name);
-                const isClearance =
+                const isSale =
+                  cat.type === 'sale' ||
                   cat.slug === 'sale' ||
                   cat.slug === 'clearance' ||
+                  cat.name.includes('特價') ||
                   cat.name.includes('清倉');
                 const isNewArrival =
+                  cat.type === 'new' ||
                   cat.slug === 'new' ||
                   cat.slug === 'new-arrivals' ||
                   cat.name.includes('新品');
@@ -462,13 +468,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                     className={`flex items-center justify-between w-full px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${
                       isActive
                         ? 'bg-[#438DB8] text-white shadow-xs font-semibold'
-                        : isClearance
-                        ? 'bg-[#FFB94B]/20 text-[#263B3F] border border-[#FFB94B]/40'
+                        : isSale
+                        ? 'bg-[#FFB94B]/20 text-[#263B3F] border border-[#FFB94B]/40 font-semibold'
                         : 'text-[#263B3F] hover:bg-[#263B3F]/6'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      {isClearance && <Tag className="w-4 h-4 text-[#FFB94B]" />}
+                      {isSale && <Tag className="w-4 h-4 text-[#FFB94B]" />}
                       {isNewArrival && (
                         <Sparkles
                           className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#438DB8]'}`}

@@ -21,6 +21,9 @@ function AppContent() {
   const [currentView, setCurrentView] = useState<
     'home' | 'category' | 'search' | 'cart' | 'checkout' | 'order-success'
   >('home');
+  const [previousView, setPreviousView] = useState<
+    'home' | 'category' | 'search' | 'cart' | 'checkout' | 'order-success'
+  >('home');
   const [activeCategoryId, setActiveCategoryId] = useState<CategoryId>('life');
 
   // Brand filter state per category (defaults to 'all' on entry)
@@ -53,6 +56,7 @@ function AppContent() {
   const handleSelectCategory = (categoryId: CategoryId) => {
     setActiveCategoryId(categoryId);
     setSelectedBrand('all');
+    setPreviousView('category');
     setCurrentView('category');
     window.location.hash = `category/${categoryId}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,6 +71,7 @@ function AppContent() {
   const handleSearch = (query: string) => {
     if (!query.trim()) return;
     setSearchQuery(query.trim());
+    setPreviousView('search');
     setCurrentView('search');
     window.location.hash = `search/${encodeURIComponent(query.trim())}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -74,17 +79,34 @@ function AppContent() {
 
   // Handler: Navigate to Home
   const handleNavigateHome = () => {
+    setPreviousView('home');
     setCurrentView('home');
     setSelectedBrand('all');
     window.location.hash = '';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Handler: Navigate to Cart (/cart)
+  // Handler: Navigate to Cart / Toggle Cart
   const handleNavigateCart = () => {
-    setCurrentView('cart');
-    window.location.hash = 'cart';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (currentView === 'cart') {
+      const targetView = previousView === 'cart' ? 'home' : previousView;
+      setCurrentView(targetView);
+      if (targetView === 'home') {
+        window.location.hash = '';
+      } else if (targetView === 'category') {
+        window.location.hash = `category/${activeCategoryId}`;
+      } else if (targetView === 'search') {
+        window.location.hash = `search/${encodeURIComponent(searchQuery)}`;
+      } else {
+        window.location.hash = targetView;
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setPreviousView(currentView);
+      setCurrentView('cart');
+      window.location.hash = 'cart';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   // Handler: Navigate to Checkout (/checkout)

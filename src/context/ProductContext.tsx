@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Brand, Category, CategoryId, ProductVariant } from '../types';
 import { supabase } from '../services/supabase';
+import { matchesCategory } from '../utils/filterUtils';
 
 interface ProductContextType {
   products: Product[];
@@ -25,9 +26,10 @@ function mapSupabaseProduct(raw: any): Product {
   const isNew = Boolean(raw.is_new ?? raw.isNewArrival);
   const isSale = Boolean(raw.is_sale ?? raw.isClearance);
 
-  // Map variants if available
-  const variants: ProductVariant[] = Array.isArray(raw.product_variants)
-    ? raw.product_variants.map((v: any) => ({
+  // Map variants if available (support both product_variants and variants fields)
+  const rawVariantList = raw.product_variants || raw.variants;
+  const variants: ProductVariant[] = Array.isArray(rawVariantList)
+    ? rawVariantList.map((v: any) => ({
         id: String(v.id),
         product_id: String(v.product_id),
         name: v.name || '',
@@ -93,13 +95,21 @@ function mapSupabaseProduct(raw: any): Product {
   const finalIsNew = variants.length > 0 ? hasNewVariant : isNew;
   const finalIsSale = variants.length > 0 ? hasSaleVariant : isSale;
 
+  // Prioritize primaryVariant.image, then raw.image from Supabase
   const imageUrl =
-    raw.img ||
+    (primaryVariant && primaryVariant.image) ||
+    raw.image ||
     raw.image_url ||
     raw.imageUrl ||
-    'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=800&q=80';
+    raw.img ||
+    '';
 
-  const hoverImageUrl = raw.hover_img || raw.hoverImageUrl || imageUrl;
+  const hoverImageUrl =
+    (variants.length > 1 && variants[1].image) ||
+    raw.hover_image ||
+    raw.hover_img ||
+    raw.hoverImageUrl ||
+    imageUrl;
 
   const tags: string[] = [];
   if (finalIsNew) tags.push('新品上市');
@@ -167,11 +177,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setError(null);
     try {
       if (!supabase) {
-        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_PUBLISHABLE_KEY 設定');
+        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY 設定');
       }
 
-      // Fetch products, product variants, and brands in parallel directly from Supabase
-      const [productsRes, variantsRes, brandsRes] = await Promise.all([
+      // Fetch products, product variants, product options, and brands in parallel directly from Supabase
+      const [productsRes, variantsRes, optionsRes, brandsRes] = await Promise.all([
         supabase
           .from('products')
           .select(`
@@ -193,9 +203,27 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
             is_new,
             is_sale,
             option_values,
+            image,
+            expiry_date,
             is_active
           `)
           .eq('is_active', true),
+        supabase
+          .from('product_options')
+          .select('*')
+          .then(
+            (res) => {
+              if (res.error) {
+                console.warn('Supabase product_options fetch warning:', res.error);
+                return { data: [] };
+              }
+              return res;
+            },
+            (err) => {
+              console.warn('Supabase product_options network error:', err);
+              return { data: [] };
+            }
+          ),
         supabase
           .from('brands')
           .select('*')
@@ -203,14 +231,20 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
       ]);
 
       if (productsRes.error) {
+        console.error('Supabase products query failed:', productsRes.error);
         throw new Error(`無法取得商品資料: ${productsRes.error.message}`);
       }
+      if (variantsRes.error) {
+        console.warn('Supabase product_variants query warning:', variantsRes.error);
+      }
       if (brandsRes.error) {
+        console.error('Supabase brands query failed:', brandsRes.error);
         throw new Error(`無法取得品牌資料: ${brandsRes.error.message}`);
       }
 
       const rawProducts = productsRes.data || [];
       const rawVariants = variantsRes.data || [];
+      const rawOptions = (optionsRes as any)?.data || [];
       const rawBrands = brandsRes.data || [];
 
       // Group variants by product_id
@@ -231,10 +265,43 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
           is_new: Boolean(variant.is_new),
           is_sale: Boolean(variant.is_sale),
           option_values: variant.option_values || null,
+          image: variant.image || null,
+          expiry_date: variant.expiry_date || null,
         });
       }
 
-      // Hydrate raw products with their variants
+      // Group options by product_id
+      const optionsByProductId = new Map<string, any[]>();
+      for (const opt of rawOptions) {
+        const pId = String(opt.product_id);
+        if (!optionsByProductId.has(pId)) {
+          optionsByProductId.set(pId, []);
+        }
+
+        const optName = opt.name || '';
+        let optValues: string[] = [];
+        if (Array.isArray(opt.values) && opt.values.length > 0) {
+          optValues = opt.values.filter(Boolean).map(String);
+        } else {
+          const productVariants = variantsByProductId.get(pId) || [];
+          const extractedValues = new Set<string>();
+          for (const v of productVariants) {
+            if (v.option_values && v.option_values[optName]) {
+              extractedValues.add(String(v.option_values[optName]));
+            } else if (v.name) {
+              extractedValues.add(String(v.name));
+            }
+          }
+          optValues = Array.from(extractedValues);
+        }
+
+        optionsByProductId.get(pId)!.push({
+          name: optName,
+          values: optValues,
+        });
+      }
+
+      // Hydrate raw products with their variants and options
       const hydratedRawProducts = rawProducts.map((prod: any) => ({
         ...prod,
         id: String(prod.id),
@@ -242,10 +309,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         description: prod.description || null,
         brand_id: prod.brand_id ? String(prod.brand_id) : null,
         category_id: prod.category_id ? String(prod.category_id) : null,
-        price: prod.price != null ? Number(prod.price) : 0,
+        price: prod.price != null ? Number(prod.price) : null,
         original_price: prod.original_price != null ? Number(prod.original_price) : null,
         clearance_price: prod.clearance_price != null ? Number(prod.clearance_price) : null,
-        img: prod.img || null,
+        image: prod.image || prod.img || prod.image_url || null,
+        img: prod.image || prod.img || null,
         hover_img: prod.hover_img || null,
         weight: prod.weight != null ? Number(prod.weight) : null,
         expiry_date: prod.expiry_date || null,
@@ -256,6 +324,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         categories: prod.categories || null,
         brands: prod.brands || null,
         product_variants: variantsByProductId.get(String(prod.id)) || [],
+        options: optionsByProductId.get(String(prod.id)) || (Array.isArray(prod.options) ? prod.options : []),
       }));
 
       const formattedProducts = hydratedRawProducts.map(mapSupabaseProduct);
@@ -268,6 +337,11 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         logo_url: b.img || null,
         is_active: b.is_active ?? true,
       }));
+
+      console.log('[Supabase] products', formattedProducts);
+      console.log('[Supabase] brands', formattedBrands);
+      console.log('[Supabase] variants', rawVariants);
+      console.log('[Supabase] options', rawOptions);
 
       setProducts(formattedProducts);
       setBrands(formattedBrands);
@@ -311,22 +385,7 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
   // Dynamic brand list calculation for a specific category
   const getBrandsForCategory = useCallback(
     (category: Category | string): string[] => {
-      let catId = typeof category === 'string' ? category : category.id;
-      let catName = typeof category === 'string' ? '' : category.name;
-      let catSlug = typeof category === 'string' ? '' : category.slug;
-
-      const categoryProducts = products.filter((p) => {
-        if (p.categoryId === catId || p.categorySlug === catId || p.categorySlug === catSlug) {
-          return true;
-        }
-        if (catName && (p.categoryName === catName || p.categoryId === catName)) {
-          return true;
-        }
-        // If special category like 'new-arrivals' or 'clearance'
-        if (catSlug === 'new' || catName.includes('新品')) return p.isNewArrival;
-        if (catSlug === 'sale' || catName.includes('清倉')) return p.isClearance;
-        return false;
-      });
+      const categoryProducts = products.filter((p) => matchesCategory(p, category));
 
       const uniqueBrands = new Set<string>();
       categoryProducts.forEach((p) => {

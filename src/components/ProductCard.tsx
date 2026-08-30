@@ -56,10 +56,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       onClick={() => onSelect(product)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group relative flex flex-col bg-white rounded-xl overflow-hidden border border-[#263B3F]/8 shadow-[0_2px_12px_rgba(38,59,63,0.04)] hover:shadow-[0_8px_24px_rgba(38,59,63,0.08)] transition-all duration-300 cursor-pointer"
+      className="group relative flex flex-col h-full bg-white rounded-xl overflow-hidden border border-[#263B3F]/8 shadow-[0_2px_12px_rgba(38,59,63,0.04)] hover:shadow-[0_8px_24px_rgba(38,59,63,0.08)] transition-all duration-300 cursor-pointer"
     >
       {/* Image Container */}
-      <div className="relative aspect-[4/3.8] w-full overflow-hidden bg-[#F6F3EA]/60">
+      <div className="relative w-full h-[220px] lg:h-auto lg:aspect-[4/3.8] shrink-0 overflow-hidden bg-[#F6F3EA]/60">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-[#263B3F]/5 animate-pulse" />
         )}
@@ -103,30 +103,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col flex-grow p-4 md:p-5">
-        {/* Brand & Origin Row */}
-        <div className="flex items-center justify-between text-xs text-[#263B3F]/65 mb-1.5">
-          <span className="font-semibold tracking-wider text-[#438DB8] uppercase text-[11px]">
-            {product.brand}
-          </span>
-          <span className="flex items-center gap-1 text-[11px] text-[#263B3F]/60">
-            <MapPin className="w-3 h-3 text-[#438DB8]" />
-            {product.origin.split(',')[0]}
-          </span>
+      <div className="flex flex-col flex-1 p-4 md:p-5 justify-between">
+        <div className="flex flex-col flex-1">
+          {/* Brand & Origin Row */}
+          <div className="flex items-center justify-between text-xs text-[#263B3F]/65 mb-1.5 shrink-0">
+            <span className="font-semibold tracking-wider text-[#438DB8] uppercase text-[11px]">
+              {product.brand}
+            </span>
+            <span className="flex items-center gap-1 text-[11px] text-[#263B3F]/60">
+              <MapPin className="w-3 h-3 text-[#438DB8]" />
+              {product.origin.split(',')[0]}
+            </span>
+          </div>
+
+          {/* Product Title - full display on mobile, pushes down evenly */}
+          <div className="flex-1 flex flex-col justify-start">
+            <h3 className="text-sm md:text-[15px] font-medium text-[#263B3F] lg:line-clamp-2 mb-2 group-hover:text-[#438DB8] transition-colors leading-snug break-words">
+              {product.name}
+            </h3>
+          </div>
+
+          {/* Short Description */}
+          {product.shortDescription && (
+            <p className="text-xs text-[#263B3F]/60 line-clamp-1 mb-3 shrink-0">
+              {product.shortDescription}
+            </p>
+          )}
         </div>
 
-        {/* Product Title */}
-        <h3 className="text-sm md:text-[15px] font-medium text-[#263B3F] line-clamp-2 mb-2 group-hover:text-[#438DB8] transition-colors leading-snug">
-          {product.name}
-        </h3>
-
-        {/* Short Description */}
-        <p className="text-xs text-[#263B3F]/60 line-clamp-1 mb-3">
-          {product.shortDescription}
-        </p>
-
         {/* Price & Mobile Add to Cart */}
-        <div className="mt-auto pt-3 border-t border-[#263B3F]/8 flex items-center justify-between gap-2">
+        <div className="mt-auto pt-3 border-t border-[#263B3F]/8 flex items-center justify-between gap-2 shrink-0">
           <div className="flex flex-col">
             <span className="text-base md:text-lg font-bold text-[#263B3F] tracking-tight">
               NT$ {effectivePrice.toLocaleString()}
