@@ -1,7 +1,6 @@
 {
-  "name": "波波澳洲代購",
-  "description": "波波澳洲代購 - 來自澳洲的日常好物",
+  "name": "Good on ya !",
+  "description": "Good on ya ! - 來自澳洲的日常好物",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-  
 }

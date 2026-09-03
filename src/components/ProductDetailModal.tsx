@@ -3,9 +3,9 @@ import { Product, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import {
   getVariantEffectivePrice,
-  getVariantOriginalPrice,
+  getVariantNormalPrice,
   getProductEffectivePrice,
-  getProductOriginalPrice,
+  getProductNormalPrice,
   isItemOnSale,
   isItemNew,
 } from '../utils/priceUtils';
@@ -57,9 +57,8 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   if (!product) return null;
 
   // Active price and attributes depending on selected variant or base product
-  // Rule 8: is_sale = true -> clearance_price, Rule 9: is_sale = false -> price, Rule 10: original_price
   const activePrice = getProductEffectivePrice(product, selectedVariant);
-  const activeOriginalPrice = getProductOriginalPrice(product, selectedVariant);
+  const activeNormalPrice = getProductNormalPrice(product, selectedVariant);
   const activeIsNew = isItemNew(product, selectedVariant);
   const activeIsSale = isItemOnSale(product, selectedVariant);
   const activeWeight = selectedVariant && selectedVariant.weight != null
@@ -175,9 +174,9 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <span className="text-2xl font-bold text-[#438DB8]">
                 NT$ {activePrice.toLocaleString()}
               </span>
-              {activeOriginalPrice && activeOriginalPrice > activePrice && (
-                <span className="text-sm text-[#263B3F]/40 line-through">
-                  NT$ {activeOriginalPrice.toLocaleString()}
+              {activeIsSale && activeNormalPrice > activePrice && (
+                <span className="text-sm text-[#263B3F]/50">
+                  正常售價 NT$ {activeNormalPrice.toLocaleString()}
                 </span>
               )}
               <div className="flex items-center gap-2 ml-auto flex-wrap">
@@ -222,7 +221,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   {product.variants.map((v) => {
                     const isSelected = selectedVariant?.id === v.id;
                     const vPrice = getVariantEffectivePrice(v);
-                    const vOrigPrice = getVariantOriginalPrice(v);
+                    const vNormalPrice = getVariantNormalPrice(v);
                     return (
                       <button
                         key={v.id}
@@ -248,13 +247,13 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                         </div>
 
                         <div className="flex items-baseline justify-between text-xs mt-0.5">
-                          <div className="flex items-baseline gap-1.5">
+                          <div className="flex items-baseline gap-2">
                             <span className={`font-bold ${isSelected ? 'text-white' : 'text-[#438DB8]'}`}>
                               NT$ {vPrice.toLocaleString()}
                             </span>
-                            {vOrigPrice && vOrigPrice > vPrice && (
-                              <span className={`text-[10px] line-through ${isSelected ? 'text-white/60' : 'text-[#263B3F]/40'}`}>
-                                NT$ {vOrigPrice.toLocaleString()}
+                            {v.is_sale && vNormalPrice > vPrice && (
+                              <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-[#263B3F]/50'}`}>
+                                正常售價 NT$ {vNormalPrice.toLocaleString()}
                               </span>
                             )}
                           </div>

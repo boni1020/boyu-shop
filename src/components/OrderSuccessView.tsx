@@ -188,7 +188,7 @@ export const OrderSuccessView: React.FC<OrderSuccessViewProps> = ({
           className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#438DB8] text-white font-semibold text-sm shadow-md hover:bg-[#438DB8]/90 transition-all cursor-pointer"
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>返回波波首頁</span>
+          <span>返回 Good on ya ! 首頁</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

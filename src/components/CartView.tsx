@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types';
-import { getCartItemUnitPrice, getCartItemOriginalPrice } from '../utils/priceUtils';
+import { getCartItemUnitPrice, getCartItemNormalPrice } from '../utils/priceUtils';
 import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
 
 interface CartViewProps {
@@ -99,9 +99,11 @@ export const CartView: React.FC<CartViewProps> = ({
           {cart.map((cartItem) => {
             const { cartItemId, product, quantity, selectedVariant, selectedOptions } = cartItem;
             const unitPrice = getCartItemUnitPrice(cartItem);
-            const originalPrice = getCartItemOriginalPrice(cartItem);
+            const normalPrice = getCartItemNormalPrice(cartItem);
+            const isSale = selectedVariant
+              ? Boolean(selectedVariant.is_sale)
+              : Boolean(product.isClearance);
             const subtotal = unitPrice * quantity;
-            const hasDiscount = originalPrice != null && originalPrice > unitPrice;
 
             return (
               <div
@@ -154,9 +156,9 @@ export const CartView: React.FC<CartViewProps> = ({
 
                   <div className="flex items-baseline gap-2 text-xs text-[#263B3F]/60 mt-1">
                     <span>單價：NT$ {unitPrice.toLocaleString()}</span>
-                    {hasDiscount && (
-                      <span className="text-[11px] text-[#263B3F]/40 line-through">
-                        NT$ {originalPrice?.toLocaleString()}
+                    {isSale && normalPrice > unitPrice && (
+                      <span className="text-[11px] text-[#263B3F]/50">
+                        (正常售價 NT$ {normalPrice.toLocaleString()})
                       </span>
                     )}
                   </div>

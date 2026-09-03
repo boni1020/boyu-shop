@@ -116,12 +116,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={onNavigateHome}
                 className="group flex flex-col items-start text-left focus:outline-hidden cursor-pointer"
               >
-                <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2 leading-tight">
+                <div className="flex items-baseline leading-tight">
                   <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors whitespace-nowrap">
-                    波波澳洲代購
-                  </span>
-                  <span className="text-[10px] sm:text-xs font-semibold tracking-[0.2em] text-[#438DB8] uppercase whitespace-nowrap">
-                    BoBo Australia
+                    Good on ya !
                   </span>
                 </div>
               </button>
@@ -396,10 +393,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="flex items-center justify-between pb-4 border-b border-[#263B3F]/12 mb-6">
               <div>
                 <span className="text-xl font-bold text-[#263B3F] font-serif-brand">
-                  波波澳洲代購
-                </span>
-                <span className="block text-[10px] text-[#438DB8] uppercase tracking-widest font-medium">
-                  BoBo Australia
+                  Good on ya
                 </span>
               </div>
               <button

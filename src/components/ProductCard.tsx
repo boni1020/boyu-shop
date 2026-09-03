@@ -3,8 +3,9 @@ import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import {
   getProductEffectivePrice,
-  getProductOriginalPrice,
+  getProductNormalPrice,
   isItemNew,
+  isItemOnSale,
 } from '../utils/priceUtils';
 import { MapPin, Sparkles, Eye, ShoppingBag, Check } from 'lucide-react';
 
@@ -19,12 +20,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
   const [imageLoaded, setImageLoaded] = useState(false);
   const [added, setAdded] = useState(false);
 
-  // Variant-based price calculations
+  // Price calculations
   const effectivePrice = getProductEffectivePrice(product);
-  const effectiveOriginalPrice = getProductOriginalPrice(product);
+  const normalPrice = getProductNormalPrice(product);
+  const isSale = isItemOnSale(product);
   const isNew = isItemNew(product);
-
-  const hasDiscount = effectiveOriginalPrice != null && effectiveOriginalPrice > effectivePrice;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -134,12 +134,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
         {/* Price & Mobile Add to Cart */}
         <div className="mt-auto pt-3 border-t border-[#263B3F]/8 flex items-center justify-between gap-2 shrink-0">
           <div className="flex flex-col">
-            <span className="text-base md:text-lg font-bold text-[#263B3F] tracking-tight">
+            <span className={`text-base md:text-lg font-bold tracking-tight ${isSale ? 'text-[#438DB8]' : 'text-[#263B3F]'}`}>
               NT$ {effectivePrice.toLocaleString()}
             </span>
-            {hasDiscount && (
-              <span className="text-xs text-[#263B3F]/40 line-through">
-                NT$ {effectiveOriginalPrice?.toLocaleString()}
+            {isSale && normalPrice > effectivePrice && (
+              <span className="text-[11px] text-[#263B3F]/50">
+                正常售價 NT$ {normalPrice.toLocaleString()}
               </span>
             )}
           </div>

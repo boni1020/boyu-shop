@@ -16,7 +16,6 @@ DECLARE
   v_settings record;
   v_exchange_rate numeric;
   v_shipping_per_kg numeric;
-  v_orig_margin numeric;
   v_sell_margin numeric;
   v_clear_margin numeric;
   v_single_costs_updated integer := 0;
@@ -28,7 +27,6 @@ BEGIN
   SELECT
     cost_exchange_rate,
     shipping_per_kg,
-    original_margin_rate,
     selling_margin_rate,
     clearance_margin_rate
   INTO v_settings
@@ -42,10 +40,7 @@ BEGIN
   v_exchange_rate   := COALESCE(v_settings.cost_exchange_rate, 21.5);
   v_shipping_per_kg := COALESCE(v_settings.shipping_per_kg, 200.0);
   
-  -- Margin rates normalization (if stored as 40 instead of 0.40)
-  v_orig_margin  := COALESCE(v_settings.original_margin_rate, 0.40);
-  IF v_orig_margin >= 1 THEN v_orig_margin := v_orig_margin / 100.0; END IF;
-
+  -- Margin rates normalization (if stored as 35 instead of 0.35)
   v_sell_margin  := COALESCE(v_settings.selling_margin_rate, 0.35);
   IF v_sell_margin >= 1 THEN v_sell_margin := v_sell_margin / 100.0; END IF;
 
@@ -53,7 +48,6 @@ BEGIN
   IF v_clear_margin >= 1 THEN v_clear_margin := v_clear_margin / 100.0; END IF;
 
   -- Guard against division by zero
-  IF v_orig_margin >= 1.0 THEN v_orig_margin := 0.99; END IF;
   IF v_sell_margin >= 1.0 THEN v_sell_margin := 0.99; END IF;
   IF v_clear_margin >= 1.0 THEN v_clear_margin := 0.99; END IF;
 
@@ -72,11 +66,10 @@ BEGIN
   )
   SELECT COUNT(*) INTO v_single_costs_updated FROM updated_costs;
 
-  -- 2. 依據 cost_twd 計算 products 的三種價格 (以 10 元進位)
+  -- 2. 依據 cost_twd 計算 products 的兩種價格 (以 10 元進位)
   WITH updated_prods AS (
     UPDATE public.products p
     SET
-      original_price  = CEIL((pc.cost_twd / (1.0 - v_orig_margin)) / 10.0) * 10,
       price           = CEIL((pc.cost_twd / (1.0 - v_sell_margin)) / 10.0) * 10,
       clearance_price = CEIL((pc.cost_twd / (1.0 - v_clear_margin)) / 10.0) * 10
     FROM public.product_costs pc
@@ -101,11 +94,10 @@ BEGIN
   )
   SELECT COUNT(*) INTO v_multi_costs_updated FROM updated_variant_costs;
 
-  -- 2. 依據 cost_twd 計算 product_variants 的三種價格 (以 10 元進位)
+  -- 2. 依據 cost_twd 計算 product_variants 的兩種價格 (以 10 元進位)
   WITH updated_vars AS (
     UPDATE public.product_variants pv
     SET
-      original_price  = CEIL((pc.cost_twd / (1.0 - v_orig_margin)) / 10.0) * 10,
       price           = CEIL((pc.cost_twd / (1.0 - v_sell_margin)) / 10.0) * 10,
       clearance_price = CEIL((pc.cost_twd / (1.0 - v_clear_margin)) / 10.0) * 10
     FROM public.product_costs pc

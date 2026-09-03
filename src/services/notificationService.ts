@@ -1,5 +1,6 @@
 import { Order } from '../types';
 import { getCartItemUnitPrice } from '../utils/priceUtils';
+
 /**
  * 訂單通知內容介面 - 店家通知
  */

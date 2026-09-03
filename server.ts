@@ -150,7 +150,6 @@ async function startServer() {
             name,
             weight,
             price,
-            original_price,
             clearance_price,
             is_new,
             is_sale,
@@ -183,7 +182,6 @@ async function startServer() {
           name: variant.name || '',
           weight: variant.weight != null ? Number(variant.weight) : null,
           price: variant.price != null ? Number(variant.price) : 0,
-          original_price: variant.original_price != null ? Number(variant.original_price) : null,
           clearance_price: variant.clearance_price != null ? Number(variant.clearance_price) : null,
           is_new: Boolean(variant.is_new),
           is_sale: Boolean(variant.is_sale),
@@ -215,12 +213,6 @@ async function startServer() {
               ? Number(prod.price)
               : 0);
 
-        const originalPrice = primaryVariant
-          ? primaryVariant.original_price
-          : prod.original_price != null
-          ? Number(prod.original_price)
-          : null;
-
         const weight = primaryVariant && primaryVariant.weight != null
           ? primaryVariant.weight
           : prod.weight != null
@@ -234,7 +226,6 @@ async function startServer() {
           brand_id: prod.brand_id ? String(prod.brand_id) : null,
           category_id: prod.category_id ? String(prod.category_id) : null,
           price: effectivePrice,
-          original_price: originalPrice,
           clearance_price: prod.clearance_price != null ? Number(prod.clearance_price) : null,
           img: prod.img || null,
           hover_img: prod.hover_img || null,

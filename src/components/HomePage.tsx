@@ -1,11 +1,12 @@
 import React from 'react';
 import { CategoryId, Product } from '../types';
 import { ProductCard } from './ProductCard';
+import { ProductCarouselSection } from './ProductCarouselSection';
 import { ArrowRight, Sparkles, Tag, ShoppingBag, Utensils, AlertCircle, Heart, ShieldCheck } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useCategories } from '../context/CategoryContext';
 import { useProducts } from '../context/ProductContext';
-import { getProductEffectivePrice, getProductOriginalPrice } from '../utils/priceUtils';
+import { getProductEffectivePrice, getProductNormalPrice, isItemOnSale } from '../utils/priceUtils';
 
 interface HomePageProps {
   allProducts: Product[];
@@ -69,13 +70,46 @@ export const HomePage: React.FC<HomePageProps> = ({
     return allProducts.filter((p) => p.isClearance === true).slice(0, 2);
   }, [allProducts]);
 
-  // Target ID for explore / life category
-  const exploreCategoryId = React.useMemo(() => {
-    const lifeCat = categories.find(
-      (c) => c.name === '生活補給' || c.slug === 'life-supplies' || c.slug === 'life' || c.slug === 'healthy'
+  // Target Category for Life Supplies (生活補給)
+  const lifeSuppliesCategory = React.useMemo(() => {
+    return categories.find(
+      (c) =>
+        c.name === '生活補給' ||
+        c.name.includes('生活') ||
+        c.slug === 'life-supplies' ||
+        c.slug === 'life' ||
+        c.slug === 'healthy'
     );
-    return lifeCat ? lifeCat.id : 'life-supplies';
   }, [categories]);
+
+  const lifeSuppliesCategoryId = React.useMemo(() => {
+    return lifeSuppliesCategory ? lifeSuppliesCategory.id : 'life-supplies';
+  }, [lifeSuppliesCategory]);
+
+  // Life Supplies Products: category === '生活補給' & is_active === true (5 items)
+  const lifeSuppliesProducts = React.useMemo(() => {
+    return allProducts
+      .filter((p) => {
+        const isActive = p.isActive !== false && p.rawSupabaseData?.is_active !== false;
+        if (!isActive) return false;
+
+        if (lifeSuppliesCategory) {
+          return isProductInCategory(p, lifeSuppliesCategory);
+        }
+        return (
+          p.categoryName === '生活補給' ||
+          p.categorySlug === 'life-supplies' ||
+          p.categorySlug === 'life' ||
+          (lifeSuppliesCategoryId && String(p.categoryId) === String(lifeSuppliesCategoryId))
+        );
+      })
+      .slice(0, 5);
+  }, [allProducts, lifeSuppliesCategory, lifeSuppliesCategoryId, isProductInCategory]);
+
+  // Target ID for explore / life category (Hero banner button)
+  const exploreCategoryId = React.useMemo(() => {
+    return lifeSuppliesCategoryId;
+  }, [lifeSuppliesCategoryId]);
 
   // Target ID for food pantry
   const foodCategoryId = React.useMemo(() => {
@@ -160,17 +194,14 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-[#FFB94B] bg-white/10 backdrop-blur-xs border border-white/20 tracking-[0.2em] uppercase mb-4 rounded-full">
               <Sparkles className="w-3.5 h-3.5" />
-              AUSTRALIAN DIRECT SELECTION
-            </div>
+              FROM DOWN UNDER             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white font-serif-brand leading-[1.15] mb-6">
-              把澳洲的陽光與日常，打包寄給你
+              精選澳洲日常好物
             </h1>
 
             <p className="text-sm md:text-base text-white/90 leading-relaxed max-w-xl mb-8 font-light">
-              波波嚴選南半球純淨好物，保健補給、有機美食與日常保養，輕鬆直送你家！
-            </p>
-
+              從澳洲挑選值得帶回家的好物，保健、美食與生活選品，簡單、自然。           </p>
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -191,105 +222,51 @@ export const HomePage: React.FC<HomePageProps> = ({
           - Desktop: 5 columns grid
           - Mobile / Tablet: Horizontal swipe carousel / slideshow (5 items)
       ======================================================== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-3 md:pt-12 md:pb-6 lg:py-18">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <div className="w-full sm:w-auto">
-            {/* Row 1: [Icon] NEW ARRIVALS */}
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#438DB8] tracking-widest uppercase mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-[#FFB94B]" />
-              NEW ARRIVALS
-            </div>
-
-            {/* Row 2: Mobile (新品上市 on left, 看更多最新好物 on right) | Desktop (新品上市) */}
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#263B3F] font-serif-brand">
-                新品上市
-              </h2>
-              {/* Mobile Right Link */}
-              <button
-                type="button"
-                id="btn-home-view-all-new-arrivals-mobile"
-                onClick={() => {
-                  const newCat = categories.find(
-                    (c) => c.name.includes('新品') || c.slug === 'new-arrivals' || c.slug === 'new'
-                  );
-                  onSelectCategory(newCat ? newCat.id : 'new-arrivals');
-                }}
-                className="sm:hidden text-xs font-semibold text-[#438DB8] hover:underline flex items-center gap-1 shrink-0 cursor-pointer"
-              >
-                <span>看更多最新好物</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Row 3: Subtitle */}
-            <p className="text-xs sm:text-sm text-[#263B3F]/70 mt-1">
-              剛從澳洲搭飛機來台的最新好物！
-            </p>
-          </div>
-
-          {/* Desktop Right Link */}
-          <div className="hidden sm:flex items-center justify-end gap-3 self-auto">
-            <button
-              type="button"
-              id="btn-home-view-all-new-arrivals"
-              onClick={() => {
-                const newCat = categories.find(
-                  (c) => c.name.includes('新品') || c.slug === 'new-arrivals' || c.slug === 'new'
-                );
-                onSelectCategory(newCat ? newCat.id : 'new-arrivals');
-              }}
-              className="text-xs font-semibold text-[#438DB8] hover:underline flex items-center gap-1 self-auto cursor-pointer"
-            >
-              <span>看更多最新好物</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Loading Skeletons */}
-        {isProductsLoading && allProducts.length === 0 ? (
-          <div className="flex items-stretch overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3.5 sm:gap-4 pb-4 pt-1 px-4 sm:px-6 -mx-4 sm:-mx-6 lg:grid lg:grid-cols-5 lg:gap-4 sm:lg:gap-5 lg:p-0 lg:m-0 lg:overflow-visible">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="w-[66vw] min-w-[210px] max-w-[260px] sm:w-[230px] shrink-0 snap-start self-stretch bg-white rounded-xl p-3 border border-[#263B3F]/10 animate-pulse lg:w-auto lg:min-w-0 lg:max-w-none lg:shrink lg:snap-align-none"
-              >
-                <div className="aspect-square bg-[#263B3F]/10 rounded-lg mb-3" />
-                <div className="h-3 bg-[#263B3F]/10 rounded-sm w-2/3 mb-2" />
-                <div className="h-4 bg-[#263B3F]/15 rounded-sm w-full mb-3" />
-                <div className="h-4 bg-[#263B3F]/20 rounded-sm w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : newArrivals.length === 0 ? (
-          <div className="py-12 text-center bg-white/60 border border-[#263B3F]/10 rounded-xl">
-            <p className="text-[#263B3F]/70 text-sm">目前尚無新上架的好物</p>
-          </div>
-        ) : (
-          /* Products: Desktop 5 columns grid | Mobile Horizontal Swipe Carousel */
-          <div
-            className="flex items-stretch overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3.5 sm:gap-4 pb-4 pt-1 px-4 sm:px-6 -mx-4 sm:-mx-6 scroll-smooth lg:grid lg:grid-cols-5 lg:gap-4 sm:lg:gap-5 lg:p-0 lg:m-0 lg:overflow-visible"
-          >
-            {newArrivals.map((product) => (
-              <div
-                key={product.id}
-                className="w-[66vw] min-w-[210px] max-w-[260px] sm:w-[230px] shrink-0 snap-start flex flex-col self-stretch lg:w-auto lg:min-w-0 lg:max-w-none lg:shrink lg:snap-align-none"
-              >
-                <ProductCard
-                  product={product}
-                  onSelect={onSelectProduct}
-                />
-              </div>
-            ))}
-            {/* Mobile end spacer for clean right margin scroll */}
-            <div className="w-4 shrink-0 lg:hidden" aria-hidden="true" />
-          </div>
-        )}
-      </section>
+      <ProductCarouselSection
+        sectionId="new-arrivals"
+        badgeIcon={<Sparkles className="w-3.5 h-3.5 text-[#FFB94B]" />}
+        badgeText="NEW ARRIVALS"
+        title="新品上市"
+        subtitle="剛從澳洲搭飛機來台的最新好物！"
+        viewMoreText="看更多最新好物"
+        onViewMore={() => {
+          const newCat = categories.find(
+            (c) => c.name.includes('新品') || c.slug === 'new-arrivals' || c.slug === 'new'
+          );
+          onSelectCategory(newCat ? newCat.id : 'new-arrivals');
+        }}
+        products={newArrivals}
+        isLoading={isProductsLoading}
+        emptyText="目前尚無新上架的好物"
+        onSelectProduct={onSelectProduct}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-3 md:pt-12 md:pb-6 lg:py-18"
+      />
 
       {/* ========================================================
-          3. CURATED CATEGORIES (Top 3): 3 columns
+          3. LIFE SUPPLIES (生活補給): 5 items
+          - category = 生活補給 & is_active === true
+          - Desktop: 5 columns grid
+          - Mobile / Tablet: Horizontal swipe carousel / slideshow (5 items)
+      ======================================================== */}
+      <ProductCarouselSection
+        sectionId="life-supplies"
+        badgeIcon={<Sparkles className="w-3.5 h-3.5 text-[#FFB94B]" />}
+        badgeText="DAILY WELLNESS"
+        title="生活補給"
+        subtitle="澳洲大自然純淨植萃、草本機能補充與全家人安心守護"
+        viewMoreText="看更多生活補給"
+        onViewMore={() => {
+          onSelectCategory(lifeSuppliesCategoryId);
+        }}
+        products={lifeSuppliesProducts}
+        isLoading={isProductsLoading}
+        emptyText="目前尚無生活補給好物"
+        onSelectProduct={onSelectProduct}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-3 md:pt-12 md:pb-6 lg:py-18"
+      />
+
+      {/* ========================================================
+          4. CURATED CATEGORIES (Top 3): 3 columns
       ======================================================== */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-12 md:pt-6 md:pb-14 lg:py-16">
         <div className="text-center max-w-2xl mx-auto mb-10">
@@ -429,7 +406,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               純粹天然 ∙ 無多餘添加
             </div>
             <p className="text-white/75 leading-relaxed">
-              波波每週嚴選澳洲在地純淨美味，讓全家人吃得開心又安心。
+              Good on ya 每週嚴選澳洲在地純淨美味，讓全家人吃得開心又安心。
             </p>
           </div>
         </div>
@@ -595,14 +572,14 @@ export const HomePage: React.FC<HomePageProps> = ({
                         {/* Price & Add to Cart */}
                         <div className="mt-auto pt-3 border-t border-[#263B3F]/10 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                           <div>
-                            {getProductOriginalPrice(product) && (
-                              <div className="text-[10px] sm:text-xs text-[#263B3F]/40 line-through">
-                                NT$ {getProductOriginalPrice(product)?.toLocaleString()}
-                              </div>
-                            )}
                             <div className="text-xs sm:text-sm font-bold text-[#438DB8]">
                               NT$ {getProductEffectivePrice(product).toLocaleString()}
                             </div>
+                            {isItemOnSale(product) && getProductNormalPrice(product) > getProductEffectivePrice(product) && (
+                              <div className="text-[10px] text-[#263B3F]/50">
+                                正常售價 NT$ {getProductNormalPrice(product).toLocaleString()}
+                              </div>
+                            )}
                           </div>
 
                           <button
@@ -638,96 +615,24 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* ========================================================
-          7. FEATURED BEAUTY (純淨美妝 / 精選美妝): 5 items
+          8. FEATURED BEAUTY (純淨美妝 / 精選美妝): 5 items
           - Desktop: 5 columns grid
           - Mobile / Tablet: Horizontal swipe carousel / slideshow (5 items)
       ======================================================== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
-          <div className="w-full sm:w-auto">
-            {/* Row 1: [Icon] PURE BEAUTY & CARE */}
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#438DB8] tracking-widest uppercase mb-1">
-              <Heart className="w-3.5 h-3.5 text-[#FFB94B]" />
-              PURE BEAUTY & CARE
-            </div>
-
-            {/* Row 2: Mobile (純淨美妝保養 on left, 看更多純淨美妝 on right) | Desktop (純淨美妝保養) */}
-            <div className="flex items-center justify-between gap-4">
-              <h2 className="text-2xl sm:text-3xl font-bold text-[#263B3F] font-serif-brand">
-                純淨美妝保養
-              </h2>
-              {/* Mobile Right Link */}
-              <button
-                type="button"
-                id="btn-home-view-all-beauty-mobile"
-                onClick={() => onSelectCategory(beautyCategoryId)}
-                className="sm:hidden text-xs font-semibold text-[#438DB8] hover:underline flex items-center gap-1 shrink-0 cursor-pointer"
-              >
-                <span>看更多純淨美妝</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Row 3: Subtitle */}
-            <p className="text-xs sm:text-sm text-[#263B3F]/70 mt-1">
-              來自澳洲天然植萃與溫和滋養，給肌膚最純粹的溫柔呵護
-            </p>
-          </div>
-
-          {/* Desktop Right Link */}
-          <div className="hidden sm:flex items-center justify-end gap-3 self-auto">
-            <button
-              type="button"
-              id="btn-home-view-all-beauty"
-              onClick={() => onSelectCategory(beautyCategoryId)}
-              className="text-xs font-semibold text-[#438DB8] hover:underline flex items-center gap-1 self-auto cursor-pointer"
-            >
-              <span>看更多純淨美妝</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Loading Skeletons */}
-        {isProductsLoading && allProducts.length === 0 ? (
-          <div className="flex items-stretch overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3.5 sm:gap-4 pb-4 pt-1 px-4 sm:px-6 -mx-4 sm:-mx-6 lg:grid lg:grid-cols-5 lg:gap-4 sm:lg:gap-5 lg:p-0 lg:m-0 lg:overflow-visible">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div
-                key={i}
-                className="w-[66vw] min-w-[210px] max-w-[260px] sm:w-[230px] shrink-0 snap-start bg-white rounded-xl p-3 border border-[#263B3F]/10 animate-pulse lg:w-auto lg:min-w-0 lg:max-w-none lg:shrink lg:snap-align-none"
-              >
-                <div className="aspect-square bg-[#263B3F]/10 rounded-lg mb-3" />
-                <div className="h-3 bg-[#263B3F]/10 rounded-sm w-2/3 mb-2" />
-                <div className="h-4 bg-[#263B3F]/15 rounded-sm w-full mb-3" />
-                <div className="h-4 bg-[#263B3F]/20 rounded-sm w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : beautyProducts.length === 0 ? (
-          <div className="py-12 text-center bg-white/60 border border-[#263B3F]/10 rounded-xl">
-            <p className="text-[#263B3F]/70 text-sm">目前尚無美妝好物</p>
-          </div>
-        ) : (
-          /* Products: Desktop 5 columns grid | Mobile Horizontal Swipe Carousel */
-          <div
-            className="flex items-stretch overflow-x-auto no-scrollbar snap-x snap-mandatory gap-3.5 sm:gap-4 pb-4 pt-1 px-4 sm:px-6 -mx-4 sm:-mx-6 scroll-smooth lg:grid lg:grid-cols-5 lg:gap-4 sm:lg:gap-5 lg:p-0 lg:m-0 lg:overflow-visible"
-          >
-            {beautyProducts.map((product) => (
-              <div
-                key={product.id}
-                className="w-[66vw] min-w-[210px] max-w-[260px] sm:w-[230px] shrink-0 snap-start flex flex-col self-stretch lg:w-auto lg:min-w-0 lg:max-w-none lg:shrink lg:snap-align-none"
-              >
-                <ProductCard
-                  product={product}
-                  onSelect={onSelectProduct}
-                />
-              </div>
-            ))}
-            {/* Mobile end spacer for clean right margin scroll */}
-            <div className="w-4 shrink-0 lg:hidden" aria-hidden="true" />
-          </div>
-        )}
-      </section>
+      <ProductCarouselSection
+        sectionId="beauty"
+        badgeIcon={<Heart className="w-3.5 h-3.5 text-[#FFB94B]" />}
+        badgeText="PURE BEAUTY & CARE"
+        title="純淨美妝保養"
+        subtitle="來自澳洲天然植萃與溫和滋養，給肌膚最純粹的溫柔呵護"
+        viewMoreText="看更多純淨美妝"
+        onViewMore={() => onSelectCategory(beautyCategoryId)}
+        products={beautyProducts}
+        isLoading={isProductsLoading}
+        emptyText="目前尚無美妝好物"
+        onSelectProduct={onSelectProduct}
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20"
+      />
     </div>
   );
 };

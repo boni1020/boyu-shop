@@ -40,12 +40,6 @@ function mapSupabaseProduct(raw: any): Product {
               : Number(v.weight)
             : null,
         price: typeof v.price === 'number' ? v.price : Number(v.price) || 0,
-        original_price:
-          v.original_price != null
-            ? typeof v.original_price === 'number'
-              ? v.original_price
-              : Number(v.original_price)
-            : null,
         clearance_price:
           v.clearance_price != null
             ? typeof v.clearance_price === 'number'
@@ -61,25 +55,12 @@ function mapSupabaseProduct(raw: any): Product {
 
   const primaryVariant = variants.length > 0 ? variants[0] : null;
 
-  // Rule: is_sale = true -> clearance_price, is_sale = false -> price
+  // Normal price
   const price = primaryVariant
-    ? (primaryVariant.is_sale && primaryVariant.clearance_price != null
-        ? primaryVariant.clearance_price
-        : primaryVariant.price)
-    : (isSale && raw.clearance_price != null
-        ? Number(raw.clearance_price)
-        : typeof raw.price === 'number'
+    ? primaryVariant.price
+    : (typeof raw.price === 'number'
         ? raw.price
         : Number(raw.price) || 0);
-
-  // Rule: original price is original_price
-  const originalPrice = primaryVariant
-    ? (primaryVariant.original_price != null ? primaryVariant.original_price : undefined)
-    : (raw.original_price != null
-        ? typeof raw.original_price === 'number'
-          ? raw.original_price
-          : Number(raw.original_price)
-        : undefined);
 
   const clearancePrice = primaryVariant
     ? (primaryVariant.clearance_price != null ? primaryVariant.clearance_price : undefined)
@@ -137,7 +118,6 @@ function mapSupabaseProduct(raw: any): Product {
     categoryName,
     categorySlug,
     price,
-    originalPrice,
     clearancePrice,
     imageUrl,
     hoverImageUrl,
@@ -150,6 +130,7 @@ function mapSupabaseProduct(raw: any): Product {
     origin: originStr,
     tags,
     inStock: raw.is_active !== false,
+    isActive: raw.is_active !== false,
     isNewArrival: finalIsNew,
     isClearance: finalIsSale,
     variants,
@@ -198,7 +179,6 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
             name,
             weight,
             price,
-            original_price,
             clearance_price,
             is_new,
             is_sale,
@@ -260,7 +240,6 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
           name: variant.name || '',
           weight: variant.weight != null ? Number(variant.weight) : null,
           price: variant.price != null ? Number(variant.price) : 0,
-          original_price: variant.original_price != null ? Number(variant.original_price) : null,
           clearance_price: variant.clearance_price != null ? Number(variant.clearance_price) : null,
           is_new: Boolean(variant.is_new),
           is_sale: Boolean(variant.is_sale),
@@ -310,7 +289,6 @@ export const ProductProvider: React.FC<{ children: React.ReactNode }> = ({ child
         brand_id: prod.brand_id ? String(prod.brand_id) : null,
         category_id: prod.category_id ? String(prod.category_id) : null,
         price: prod.price != null ? Number(prod.price) : null,
-        original_price: prod.original_price != null ? Number(prod.original_price) : null,
         clearance_price: prod.clearance_price != null ? Number(prod.clearance_price) : null,
         image: prod.image || prod.img || prod.image_url || null,
         img: prod.image || prod.img || null,

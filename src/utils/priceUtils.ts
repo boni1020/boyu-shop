@@ -14,11 +14,11 @@ export function getVariantEffectivePrice(variant: ProductVariant): number {
 }
 
 /**
- * Returns the original price for a variant:
- * - original_price (or null if not set)
+ * Returns the normal price for a variant:
+ * - price
  */
-export function getVariantOriginalPrice(variant: ProductVariant): number | null {
-  return variant.original_price != null ? Number(variant.original_price) : null;
+export function getVariantNormalPrice(variant: ProductVariant): number {
+  return Number(variant.price) || 0;
 }
 
 /**
@@ -44,22 +44,20 @@ export function getProductEffectivePrice(
 }
 
 /**
- * Returns the original price for a product:
+ * Returns the normal price for a product:
  * Uses the selected variant (or the primary/first variant if none selected).
  */
-export function getProductOriginalPrice(
+export function getProductNormalPrice(
   product: Product,
   selectedVariant?: ProductVariant | null
-): number | undefined {
+): number {
   if (selectedVariant) {
-    const orig = getVariantOriginalPrice(selectedVariant);
-    return orig != null ? orig : undefined;
+    return getVariantNormalPrice(selectedVariant);
   }
   if (product.variants && product.variants.length > 0) {
-    const orig = getVariantOriginalPrice(product.variants[0]);
-    return orig != null ? orig : undefined;
+    return getVariantNormalPrice(product.variants[0]);
   }
-  return product.originalPrice;
+  return Number(product.price) || 0;
 }
 
 /**
@@ -108,12 +106,11 @@ export function getCartItemUnitPrice(item: CartItem): number {
 }
 
 /**
- * Returns the original price for a cart item:
+ * Returns the normal price for a cart item:
  */
-export function getCartItemOriginalPrice(item: CartItem): number | undefined {
+export function getCartItemNormalPrice(item: CartItem): number {
   if (item.selectedVariant) {
-    const orig = getVariantOriginalPrice(item.selectedVariant);
-    return orig != null ? orig : undefined;
+    return getVariantNormalPrice(item.selectedVariant);
   }
-  return getProductOriginalPrice(item.product);
+  return getProductNormalPrice(item.product);
 }

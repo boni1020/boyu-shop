@@ -42,7 +42,6 @@ export interface ProductVariant {
   name: string;
   weight: number | null;
   price: number;
-  original_price: number | null;
   clearance_price: number | null;
   is_new: boolean;
   is_sale: boolean;
@@ -65,7 +64,6 @@ export interface Product {
   categoryName: string;
   categorySlug?: string;
   price: number;
-  originalPrice?: number;
   clearancePrice?: number;
   imageUrl: string;
   hoverImageUrl?: string;
@@ -74,6 +72,7 @@ export interface Product {
   origin: string; // e.g. "Byron Bay, NSW", "Melbourne, VIC", "Margaret River, WA"
   tags: string[];
   inStock: boolean;
+  isActive?: boolean;
   isNewArrival?: boolean;
   isClearance?: boolean;
   variants?: ProductVariant[];
