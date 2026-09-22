@@ -2,7 +2,7 @@ import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types';
 import { getCartItemUnitPrice, getCartItemNormalPrice } from '../utils/priceUtils';
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck, Truck } from 'lucide-react';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
 
 interface CartViewProps {
   onNavigateCheckout: () => void;
@@ -17,10 +17,7 @@ export const CartView: React.FC<CartViewProps> = ({
 }) => {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, cartItemCount } = useCart();
 
-  const freeShippingThreshold = 2000;
-  const isFreeShipping = cartTotal >= freeShippingThreshold;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
-  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 60;
+  const shippingFee = cart.length === 0 ? 0 : 60;
   const finalTotal = cartTotal + shippingFee;
 
   if (cart.length === 0) {
@@ -64,33 +61,6 @@ export const CartView: React.FC<CartViewProps> = ({
         >
           清空購物車
         </button>
-      </div>
-
-      {/* Free Shipping Progress Indicator */}
-      <div className="bg-white rounded-xl p-4 border border-[#263B3F]/10 mb-8 shadow-xs">
-        <div className="flex items-center justify-between text-xs font-medium mb-2">
-          <div className="flex items-center gap-2 text-[#263B3F]">
-            <Truck className="w-4 h-4 text-[#438DB8]" />
-            {isFreeShipping ? (
-              <span className="text-[#2B8D9C] font-semibold">
-                恭喜！您的訂單已達 NT$ 2,000 免運門檻
-              </span>
-            ) : (
-              <span>
-                再消費 <span className="font-bold text-[#438DB8]">NT$ {remainingForFreeShipping.toLocaleString()}</span> 即享免運
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] text-[#263B3F]/50">滿 NT$ 2,000 免運</span>
-        </div>
-        <div className="w-full bg-[#F6F3EA] h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-[#438DB8] h-full transition-all duration-300 rounded-full"
-            style={{
-              width: `${Math.min(100, (cartTotal / freeShippingThreshold) * 100)}%`,
-            }}
-          />
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
@@ -236,13 +206,7 @@ export const CartView: React.FC<CartViewProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-[#263B3F]/70">全台運費</span>
-                <span className="font-semibold">
-                  {shippingFee === 0 ? (
-                    <span className="text-[#2B8D9C]">免運費</span>
-                  ) : (
-                    `NT$ ${shippingFee}`
-                  )}
-                </span>
+                <span className="font-semibold">NT$ {shippingFee}</span>
               </div>
             </div>
 

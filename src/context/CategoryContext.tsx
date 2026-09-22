@@ -139,13 +139,31 @@ export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         image_url: null,
       };
 
+      const TARGET_CATEGORY_ORDER = [
+        '新品上市',
+        '生活補給',
+        '精選美研',
+        '舒適配飾',
+        '日之選用',
+        '食光選物',
+        '限時特價',
+      ];
+
       const allCategories: Category[] = [
         newArrivalsCategory,
         ...formattedSupabaseCategories,
         saleCategory,
       ];
 
-      console.log('[Supabase] categories (7 categories created)', allCategories);
+      allCategories.sort((a, b) => {
+        const indexA = TARGET_CATEGORY_ORDER.indexOf(a.name);
+        const indexB = TARGET_CATEGORY_ORDER.indexOf(b.name);
+        const orderA = indexA !== -1 ? indexA : 99;
+        const orderB = indexB !== -1 ? indexB : 99;
+        return orderA - orderB;
+      });
+
+      console.log('[Supabase] categories (7 categories created in exact order)', allCategories);
       setCategories(allCategories);
     } catch (err: any) {
       console.error('Failed to fetch categories from Supabase:', err);

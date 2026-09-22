@@ -161,7 +161,7 @@ export const OrderSuccessView: React.FC<OrderSuccessViewProps> = ({
             </div>
             <div className="flex justify-between">
               <span className="text-[#263B3F]/70">7-11 運費</span>
-              <span>{order.shippingFee === 0 ? '免運' : `NT$ ${order.shippingFee}`}</span>
+              <span>NT$ {order.shippingFee}</span>
             </div>
             <div className="flex justify-between font-bold text-sm pt-2 border-t border-[#263B3F]/10">
               <span>訂單金額總計</span>
@@ -188,7 +188,7 @@ export const OrderSuccessView: React.FC<OrderSuccessViewProps> = ({
           className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#438DB8] text-white font-semibold text-sm shadow-md hover:bg-[#438DB8]/90 transition-all cursor-pointer"
         >
           <ShoppingBag className="w-4 h-4" />
-          <span>返回 Good on ya ! 首頁</span>
+          <span>返回首頁商品目錄</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </div>

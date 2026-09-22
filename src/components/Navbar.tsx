@@ -6,13 +6,11 @@ import { useProducts } from '../context/ProductContext';
 import {
   Search,
   X,
-  Menu,
-  Sparkles,
   ShoppingBag,
-  Tag,
   ArrowRight,
   TrendingUp,
   Check,
+  Home,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -35,10 +33,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const { cartItemCount, toast, dismissToast } = useCart();
   const { categories, isLoading } = useCategories();
   const { products } = useProducts();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // Mobile search expandable
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -63,7 +59,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       onSearch(searchQuery.trim());
       setSearchQuery('');
       setSearchFocused(false);
-      setIsSearchOpen(false);
     }
   };
 
@@ -83,51 +78,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-[#F6F3EA]/95 backdrop-blur-md border-b border-[#263B3F]/10 shadow-[0_1px_12px_rgba(38,59,63,0.03)]">
-        {/* Top Announcement Bar - Primary #438DB8 */}
-        <div className="bg-[#438DB8] text-white text-[11px] py-1.5 px-4 text-center tracking-wider font-light flex items-center justify-center gap-3">
-          <span className="flex items-center gap-1.5 text-white">
-            <Sparkles className="w-3 h-3 text-[#FFB94B]" />
-            單筆消費滿 NT$ 2,000 即享全台免運 ｜ 把澳洲好物帶進你的可愛日常
-          </span>
-        </div>
-
-        {/* Main Header Row */}
+      <header className="sticky top-0 z-40 w-full bg-[#F6F3EA]/95 backdrop-blur-md border-b border-[#263B3F]/10 shadow-[0_1px_10px_rgba(38,59,63,0.03)]">
+        {/* Main Desktop Header Row */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-18 md:h-20">
-            {/* Mobile Menu Button */}
-            <div className="flex items-center lg:hidden">
-              <button
-                type="button"
-                id="btn-mobile-menu-toggle"
-                onClick={() => setMobileMenuOpen(true)}
-                className="p-2 -ml-2 rounded-lg text-[#263B3F] hover:bg-[#263B3F]/8 focus:outline-hidden"
-                aria-label="選單"
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Brand Logo */}
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                id="brand-logo-btn"
-                onClick={onNavigateHome}
-                className="group flex flex-col items-start text-left focus:outline-hidden cursor-pointer"
-              >
-                <div className="flex items-baseline leading-tight">
-                  <span className="text-2xl sm:text-3xl font-bold tracking-tight text-[#263B3F] font-serif-brand group-hover:text-[#438DB8] transition-colors whitespace-nowrap">
-                    Good on ya !
-                  </span>
-                </div>
-              </button>
-            </div>
-
-            {/* Desktop Search Bar in Header */}
+          <div className="hidden lg:flex items-center justify-between gap-6 h-16">
+            {/* 1. 搜尋 (Search) on Desktop */}
             <div
               ref={searchContainerRef}
-              className="hidden md:block relative w-72 lg:w-96"
+              className="relative w-64 xl:w-72 shrink-0"
             >
               <form onSubmit={handleSearchSubmit} className="relative">
                 <input
@@ -137,15 +95,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
-                  placeholder="搜尋想找的澳洲好物、品牌（如 魚油、膠原蛋白）..."
-                  className="w-full pl-9 pr-10 py-2 rounded-full bg-white border border-[#263B3F]/15 text-xs text-[#263B3F] placeholder:text-[#263B3F]/45 focus:outline-hidden focus:border-[#438DB8] focus:ring-2 focus:ring-[#438DB8]/20 transition-all"
+                  placeholder="搜尋商品、品牌..."
+                  className="w-full pl-9 pr-8 py-2 rounded-full bg-white border border-[#263B3F]/15 text-xs text-[#263B3F] placeholder:text-[#263B3F]/45 focus:outline-hidden focus:border-[#438DB8] focus:ring-2 focus:ring-[#438DB8]/20 transition-all"
                 />
                 <Search className="w-4 h-4 text-[#263B3F]/40 absolute left-3 top-2.5 pointer-events-none" />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 text-[#263B3F]/40 hover:text-[#263B3F]"
+                    className="absolute right-2.5 top-2.5 text-[#263B3F]/40 hover:text-[#263B3F] cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -158,27 +116,27 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="p-2.5 bg-[#F6F3EA]/70 border-b border-[#263B3F]/8 text-[11px] font-semibold text-[#263B3F]/70 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <TrendingUp className="w-3 h-3 text-[#438DB8]" />
-                      相關即時選物
+                      即時搜尋建議
                     </span>
-                    <span className="text-[10px] text-[#263B3F]/50">按 Enter 送出全站搜尋</span>
+                    <span className="text-[10px] text-[#263B3F]/50">Enter 送出</span>
                   </div>
 
-                  {/* quickSuggestions */}
-                  {/* {quickSuggestions.length > 0 ? (
+                  {quickSuggestions.length > 0 ? (
                     <div className="divide-y divide-[#263B3F]/6">
                       {quickSuggestions.map((prod) => (
                         <div
                           key={prod.id}
                           onClick={() => {
                             onSearch(prod.name);
+                            setSearchQuery('');
                             setSearchFocused(false);
                           }}
-                          className="p-3 hover:bg-[#F6F3EA] cursor-pointer flex items-center gap-3 transition-colors"
+                          className="p-2.5 hover:bg-[#F6F3EA] cursor-pointer flex items-center gap-2.5 transition-colors"
                         >
                           <img
                             src={prod.imageUrl}
                             alt={prod.name}
-                            className="w-10 h-10 object-cover rounded-md bg-[#F6F3EA]"
+                            className="w-8 h-8 object-contain rounded bg-white shrink-0"
                             referrerPolicy="no-referrer"
                           />
                           <div className="flex-grow min-w-0">
@@ -193,11 +151,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="p-4 text-center text-xs text-[#263B3F]/60">
-                      無即時推薦，按 Enter 送出進行模糊搜尋
-                    </div>
-                  )} */}
+                  ) : null}
 
                   <div
                     onClick={() => {
@@ -207,78 +161,29 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }}
                     className="p-2.5 bg-[#438DB8] text-white text-xs font-medium text-center hover:bg-[#438DB8]/90 cursor-pointer transition-colors"
                   >
-                    搜尋全部與「{searchQuery}」相關的結果 →
+                    搜尋全部與「{searchQuery}」相關商品 →
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Right Action Icons & Shopping Cart */}
-            <div className="flex items-center gap-2">
-              {/* Mobile Search Trigger Icon */}
+            {/* 2. NAV 分類 (Home icon + 7 Categories in Specified Order) */}
+            <nav className="flex items-center justify-center space-x-1 xl:space-x-2 flex-grow">
               <button
                 type="button"
-                id="btn-mobile-search-toggle"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="md:hidden p-2 text-[#263B3F] hover:bg-[#263B3F]/8 rounded-lg focus:outline-hidden cursor-pointer"
-                aria-label="搜尋"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-
-              {/* Shopping Cart Button */}
-              <button
-                type="button"
-                id="btn-header-cart"
-                onClick={onNavigateCart}
-                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                  currentView === 'cart'
-                    ? 'bg-[#438DB8] text-white shadow-xs'
-                    : 'bg-white border border-[#263B3F]/15 text-[#263B3F] hover:border-[#438DB8] hover:text-[#438DB8]'
+                id="nav-home-icon-btn"
+                onClick={onNavigateHome}
+                className={`p-2 rounded-lg transition-all duration-150 cursor-pointer flex items-center justify-center shrink-0 ${
+                  currentView === 'home'
+                    ? 'bg-[#438DB8] text-white shadow-xs font-semibold'
+                    : 'text-[#263B3F]/80 hover:text-[#263B3F] hover:bg-[#263B3F]/6'
                 }`}
-                aria-label="購物車"
+                title="首頁"
+                aria-label="首頁"
               >
-                <ShoppingBag className="w-4 h-4" />
-                <span className="hidden sm:inline">購物車</span>
-                {cartItemCount > 0 ? (
-                  <span className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold min-w-[1.25rem] text-center ${
-                    currentView === 'cart' ? 'bg-white text-[#438DB8]' : 'bg-[#438DB8] text-white'
-                  }`}>
-                    {cartItemCount}
-                  </span>
-                ) : (
-                  <span className="hidden sm:inline text-[#263B3F]/50">0</span>
-                )}
+                <Home className="w-4 h-4" />
               </button>
-            </div>
-          </div>
 
-          {/* Mobile Search Bar Collapsible */}
-          {isSearchOpen && (
-            <div className="md:hidden pb-3 px-1">
-              <form onSubmit={handleSearchSubmit} className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="搜尋商品、品牌或關鍵字..."
-                  className="w-full pl-9 pr-16 py-2.5 rounded-xl bg-white border border-[#263B3F]/20 text-xs text-[#263B3F] focus:outline-hidden focus:border-[#438DB8]"
-                  autoFocus
-                />
-                <Search className="w-4 h-4 text-[#263B3F]/50 absolute left-3 top-3" />
-                <button
-                  type="submit"
-                  className="absolute right-1.5 top-1.5 px-3 py-1 bg-[#438DB8] text-white text-xs font-semibold rounded-lg"
-                >
-                  搜尋
-                </button>
-              </form>
-            </div>
-          )}
-
-          {/* Desktop Category Navigation Tabs (The Supabase Categories - Centered) */}
-          <nav className="hidden lg:flex items-center justify-center border-t border-[#263B3F]/8 py-2.5 overflow-x-auto scrollbar-none">
-            <div className="flex items-center justify-center space-x-1 xl:space-x-2">
               {isLoading && categories.length === 0 ? (
                 <div className="flex items-center gap-2 py-1">
                   {[1, 2, 3, 4, 5, 6, 7].map((i) => (
@@ -295,17 +200,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                     (activeCategoryId === cat.id ||
                       activeCategoryId === cat.slug ||
                       activeCategoryId === cat.name);
-                  const isSale =
-                    cat.type === 'sale' ||
-                    cat.slug === 'sale' ||
-                    cat.slug === 'clearance' ||
-                    cat.name.includes('特價') ||
-                    cat.name.includes('清倉');
-                  const isNewArrival =
-                    cat.type === 'new' ||
-                    cat.slug === 'new' ||
-                    cat.slug === 'new-arrivals' ||
-                    cat.name.includes('新品');
 
                   return (
                     <button
@@ -313,27 +207,136 @@ export const Navbar: React.FC<NavbarProps> = ({
                       type="button"
                       id={`nav-category-${cat.slug || cat.id}`}
                       onClick={() => onSelectCategory(cat.id)}
-                      className={`relative px-4 py-1.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+                      className={`px-3.5 py-1.5 text-sm font-medium rounded-lg transition-all duration-150 whitespace-nowrap cursor-pointer ${
                         isActive
                           ? 'bg-[#438DB8] text-white shadow-xs font-semibold'
-                          : isSale
-                          ? 'text-[#263B3F] bg-[#FFB94B]/20 hover:bg-[#FFB94B]/35 border border-[#FFB94B]/40 font-semibold'
                           : 'text-[#263B3F]/80 hover:text-[#263B3F] hover:bg-[#263B3F]/6'
                       }`}
                     >
-                      {isSale && <Tag className="w-3.5 h-3.5 text-[#FFB94B]" />}
-                      {isNewArrival && (
-                        <Sparkles
-                          className={`w-3 h-3 ${isActive ? 'text-white' : 'text-[#438DB8]'}`}
-                        />
-                      )}
-                      <span>{cat.name}</span>
+                      {cat.name}
                     </button>
                   );
                 })
               )}
+            </nav>
+
+            {/* 3. 購物車 (Cart) */}
+            <div className="shrink-0">
+              <button
+                type="button"
+                id="btn-header-cart"
+                onClick={onNavigateCart}
+                className={`relative flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  currentView === 'cart'
+                    ? 'bg-[#438DB8] text-white shadow-xs'
+                    : 'bg-white border border-[#263B3F]/15 text-[#263B3F] hover:border-[#438DB8] hover:text-[#438DB8]'
+                }`}
+                aria-label="購物車"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                <span>購物車</span>
+                {cartItemCount > 0 ? (
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[11px] font-bold min-w-[1.25rem] text-center ${
+                      currentView === 'cart'
+                        ? 'bg-white text-[#438DB8]'
+                        : 'bg-[#438DB8] text-white'
+                    }`}
+                  >
+                    {cartItemCount}
+                  </span>
+                ) : (
+                  <span className="text-[#263B3F]/50">0</span>
+                )}
+              </button>
             </div>
-          </nav>
+          </div>
+
+          {/* Mobile & Tablet Header (Row 1: Home + Search + Cart) */}
+          <div className="flex lg:hidden items-center justify-between gap-2.5 h-14">
+            {/* Mobile Home Button */}
+            <button
+              type="button"
+              id="btn-mobile-header-home"
+              onClick={onNavigateHome}
+              className={`p-2 rounded-lg transition-all cursor-pointer flex items-center justify-center shrink-0 ${
+                currentView === 'home'
+                  ? 'bg-[#438DB8] text-white shadow-xs'
+                  : 'text-[#263B3F] hover:bg-[#263B3F]/8'
+              }`}
+              title="首頁"
+              aria-label="首頁"
+            >
+              <Home className="w-5 h-5" />
+            </button>
+
+            {/* Mobile Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="relative flex-grow">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="搜尋商品、品牌..."
+                className="w-full pl-8 pr-7 py-1.5 rounded-full bg-white border border-[#263B3F]/15 text-xs text-[#263B3F] placeholder:text-[#263B3F]/45 focus:outline-hidden focus:border-[#438DB8]"
+              />
+              <Search className="w-3.5 h-3.5 text-[#263B3F]/40 absolute left-2.5 top-2 pointer-events-none" />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-2 text-[#263B3F]/40 hover:text-[#263B3F]"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              )}
+            </form>
+
+            {/* Mobile Cart Button */}
+            <button
+              type="button"
+              id="btn-mobile-header-cart"
+              onClick={onNavigateCart}
+              className={`relative flex items-center justify-center p-2 rounded-full shrink-0 transition-all cursor-pointer ${
+                currentView === 'cart'
+                  ? 'bg-[#438DB8] text-white'
+                  : 'bg-white border border-[#263B3F]/15 text-[#263B3F]'
+              }`}
+              aria-label="購物車"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              {cartItemCount > 0 && (
+                <span className="absolute -top-1 -right-1 px-1 min-w-[1.1rem] h-[1.1rem] flex items-center justify-center rounded-full text-[10px] font-bold bg-[#438DB8] text-white">
+                  {cartItemCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile & Tablet Category Scroll Row (Row 2: horizontal scroll on mobile, centered on tablet) */}
+        <div className="lg:hidden border-t border-[#263B3F]/8 bg-[#F6F3EA]/90 nav-horizontal-scrollbar px-3 sm:px-6 pt-1.5 pb-2 flex items-center justify-start md:justify-center gap-1.5 md:gap-3 flex-nowrap">
+          {categories.map((cat) => {
+            const isActive =
+              currentView === 'category' &&
+              (activeCategoryId === cat.id ||
+                activeCategoryId === cat.slug ||
+                activeCategoryId === cat.name);
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                id={`mobile-nav-category-${cat.slug || cat.id}`}
+                onClick={() => onSelectCategory(cat.id)}
+                className={`px-3 py-1 text-xs font-medium rounded-md whitespace-nowrap shrink-0 transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-[#438DB8] text-white font-semibold shadow-xs'
+                    : 'text-[#263B3F]/80 hover:text-[#263B3F] hover:bg-[#263B3F]/6'
+                }`}
+              >
+                {cat.name}
+              </button>
+            );
+          })}
         </div>
       </header>
 
@@ -344,7 +347,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <img
               src={toast.imageUrl}
               alt={toast.productName}
-              className="w-12 h-12 rounded-lg object-cover bg-white shrink-0"
+              className="w-12 h-12 rounded-lg object-contain bg-white shrink-0 p-1"
               referrerPolicy="no-referrer"
             />
             <div className="flex-grow min-w-0">
@@ -374,133 +377,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <X className="w-4 h-4" />
             </button>
-          </div>
-        </div>
-      )}
-
-      {/* Mobile Navigation Drawer */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
-          {/* Backdrop overlay */}
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-
-          {/* Drawer Menu Content */}
-          <div className="relative w-[85%] max-w-sm bg-[#F6F3EA] h-full shadow-2xl p-6 flex flex-col z-10 animate-in slide-in-from-left duration-200">
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-[#263B3F]/12 mb-6">
-              <div>
-                <span className="text-xl font-bold text-[#263B3F] font-serif-brand">
-                  Good on ya
-                </span>
-              </div>
-              <button
-                type="button"
-                id="btn-close-mobile-menu"
-                onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-full hover:bg-white text-[#263B3F] transition-colors focus:outline-hidden cursor-pointer"
-                aria-label="關閉選單"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Drawer Cart Quick Link */}
-            <div className="mb-4">
-              <button
-                type="button"
-                onClick={() => {
-                  onNavigateCart();
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full py-3 px-4 rounded-xl bg-white border border-[#263B3F]/15 flex items-center justify-between text-[#263B3F] font-semibold text-sm cursor-pointer shadow-xs hover:border-[#438DB8]"
-              >
-                <div className="flex items-center gap-2">
-                  <ShoppingBag className="w-4 h-4 text-[#438DB8]" />
-                  <span>我的購物車</span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-[#438DB8] text-white text-xs">
-                  {cartItemCount}
-                </span>
-              </button>
-            </div>
-
-            {/* Drawer Links */}
-            <div className="flex flex-col gap-2 flex-grow overflow-y-auto pr-1">
-              <div className="text-xs font-semibold text-[#263B3F]/50 uppercase tracking-wider mb-1 px-3">
-                選物分類
-              </div>
-
-              {categories.map((cat) => {
-                const isActive =
-                  currentView === 'category' &&
-                  (activeCategoryId === cat.id ||
-                    activeCategoryId === cat.slug ||
-                    activeCategoryId === cat.name);
-                const isSale =
-                  cat.type === 'sale' ||
-                  cat.slug === 'sale' ||
-                  cat.slug === 'clearance' ||
-                  cat.name.includes('特價') ||
-                  cat.name.includes('清倉');
-                const isNewArrival =
-                  cat.type === 'new' ||
-                  cat.slug === 'new' ||
-                  cat.slug === 'new-arrivals' ||
-                  cat.name.includes('新品');
-
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => {
-                      onSelectCategory(cat.id);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex items-center justify-between w-full px-4 py-3.5 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${
-                      isActive
-                        ? 'bg-[#438DB8] text-white shadow-xs font-semibold'
-                        : isSale
-                        ? 'bg-[#FFB94B]/20 text-[#263B3F] border border-[#FFB94B]/40 font-semibold'
-                        : 'text-[#263B3F] hover:bg-[#263B3F]/6'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      {isSale && <Tag className="w-4 h-4 text-[#FFB94B]" />}
-                      {isNewArrival && (
-                        <Sparkles
-                          className={`w-4 h-4 ${isActive ? 'text-white' : 'text-[#438DB8]'}`}
-                        />
-                      )}
-                      <span className="text-[15px]">{cat.name}</span>
-                    </div>
-                    <span
-                      className={`text-xs ${
-                        isActive ? 'text-white/80' : 'text-[#263B3F]/40'
-                      }`}
-                    >
-                      {cat.englishName}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Drawer Footer */}
-            <div className="pt-4 border-t border-[#263B3F]/12 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  onNavigateHome();
-                  setMobileMenuOpen(false);
-                }}
-                className="text-xs font-medium text-[#438DB8] hover:underline cursor-pointer"
-              >
-                返回代購首頁 →
-              </button>
-            </div>
           </div>
         </div>
       )}

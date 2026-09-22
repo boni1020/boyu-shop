@@ -10,6 +10,6 @@ export const BANK_CONFIG: BankConfig = {
   bankCode: '808',
   branchName: '雙和分行',
   accountNumber: '0123-456-789012',
-  accountName: 'Good on ya !',
+  accountName: '線上商城專戶',
   notes: '匯款完成後請於訂單中填寫「匯款帳號後五碼」，核帳完成後將於 1-2 個工作天內出貨。',
 };

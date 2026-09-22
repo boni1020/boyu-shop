@@ -1,6 +1,6 @@
 {
   "name": "Good on ya !",
-  "description": "Good on ya ! - 來自澳洲的日常好物",
+  "description": "來自澳洲的日常好物商品目錄",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

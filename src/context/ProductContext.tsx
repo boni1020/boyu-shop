@@ -133,6 +133,7 @@ function mapSupabaseProduct(raw: any): Product {
     isActive: raw.is_active !== false,
     isNewArrival: finalIsNew,
     isClearance: finalIsSale,
+    createdAt: raw.created_at || raw.createdAt || undefined,
     variants,
     weight: weightStr,
     shelfLife: raw.expiry_date || undefined,

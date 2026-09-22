@@ -58,19 +58,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       onMouseLeave={() => setIsHovered(false)}
       className="group relative flex flex-col h-full bg-white rounded-xl overflow-hidden border border-[#263B3F]/8 shadow-[0_2px_12px_rgba(38,59,63,0.04)] hover:shadow-[0_8px_24px_rgba(38,59,63,0.08)] transition-all duration-300 cursor-pointer"
     >
-      {/* Image Container */}
-      <div className="relative w-full h-[220px] lg:h-auto lg:aspect-[4/3.8] shrink-0 overflow-hidden bg-[#F6F3EA]/60">
+      {/* Image Container: Square container with object-contain to fully display image without cropping, pure white background */}
+      <div
+        className="relative w-full aspect-square shrink-0 overflow-hidden bg-white p-2 sm:p-3 flex items-center justify-center"
+        style={{ backgroundColor: '#FFFFFF' }}
+      >
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-[#263B3F]/5 animate-pulse" />
+          <div className="absolute inset-0 bg-white animate-pulse" />
         )}
 
         <img
           src={isHovered && product.hoverImageUrl ? product.hoverImageUrl : product.imageUrl}
           alt={product.name}
           onLoad={() => setImageLoaded(true)}
-          className={`h-full w-full object-cover object-center transition-all duration-500 ease-out group-hover:scale-105 ${
+          className={`h-full w-full object-contain object-center transition-all duration-500 ease-out group-hover:scale-105 ${
             imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
+          style={{ backgroundColor: '#FFFFFF' }}
           referrerPolicy="no-referrer"
           loading="lazy"
         />

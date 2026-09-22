@@ -11,7 +11,6 @@ import { CartView } from './components/CartView';
 import { CheckoutView } from './components/CheckoutView';
 import { OrderSuccessView } from './components/OrderSuccessView';
 import { ProductDetailModal } from './components/ProductDetailModal';
-import { Footer } from './components/Footer';
 
 function AppContent() {
   const { categories, isLoading: isCategoriesLoading, getCategoryByIdOrSlug } = useCategories();
@@ -255,12 +254,6 @@ function AppContent() {
             setCurrentView('category');
           }
         }}
-      />
-
-      {/* Footer */}
-      <Footer
-        onSelectCategory={handleSelectCategory}
-        onNavigateHome={handleNavigateHome}
       />
     </div>
   );

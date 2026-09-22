@@ -33,9 +33,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const freeShippingThreshold = 2000;
-  const isFreeShipping = cartTotal >= freeShippingThreshold;
-  const shippingFee = cart.length === 0 ? 0 : isFreeShipping ? 0 : 60;
+  const shippingFee = cart.length === 0 ? 0 : 60;
   const finalTotal = cartTotal + shippingFee;
 
   if (cart.length === 0) {
@@ -482,13 +480,7 @@ export const CheckoutView: React.FC<CheckoutViewProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-[#263B3F]/70">7-11 運費</span>
-                  <span className="font-semibold">
-                    {shippingFee === 0 ? (
-                      <span className="text-[#2B8D9C]">免運費</span>
-                    ) : (
-                      `NT$ ${shippingFee}`
-                    )}
-                  </span>
+                  <span className="font-semibold">NT$ {shippingFee}</span>
                 </div>
               </div>
 

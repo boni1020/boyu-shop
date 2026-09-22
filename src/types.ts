@@ -75,6 +75,7 @@ export interface Product {
   isActive?: boolean;
   isNewArrival?: boolean;
   isClearance?: boolean;
+  createdAt?: string;
   variants?: ProductVariant[];
   options?: ProductOption[];
   volumeOrSize?: string;
@@ -123,13 +124,6 @@ export interface BankConfig {
   accountNumber: string;
   accountName: string;
   notes?: string;
-}
-
-export interface FilterState {
-  categoryId?: CategoryId | 'all';
-  brand: string; // 'all' or specific brand
-  searchQuery: string;
-  sortBy: 'featured' | 'price-asc' | 'price-desc' | 'newest';
 }
 
 export interface BrandStats {
