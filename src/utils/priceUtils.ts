@@ -4,20 +4,12 @@ import { Product, ProductVariant, CartItem } from '../types';
  * Returns the actual selling price for a variant:
  * - is_sale === true -> clearance_price (fallback to price if clearance_price is null)
  * - is_sale === false -> price
- * Directly uses precomputed prices from Supabase recalculate_product_prices().
+ * Directly uses precomputed prices from JSON without dynamic recalculation.
  */
 export function getVariantEffectivePrice(variant: ProductVariant): number {
   if (variant.is_sale && variant.clearance_price != null) {
     return Number(variant.clearance_price);
   }
-  return Number(variant.price) || 0;
-}
-
-/**
- * Returns the normal price for a variant:
- * - price
- */
-export function getVariantNormalPrice(variant: ProductVariant): number {
   return Number(variant.price) || 0;
 }
 
@@ -44,25 +36,13 @@ export function getProductEffectivePrice(
 }
 
 /**
- * Returns the normal price for a product:
- * Uses the selected variant (or the primary/first variant if none selected).
- */
-export function getProductNormalPrice(
-  product: Product,
-  selectedVariant?: ProductVariant | null
-): number {
-  if (selectedVariant) {
-    return getVariantNormalPrice(selectedVariant);
-  }
-  if (product.variants && product.variants.length > 0) {
-    return getVariantNormalPrice(product.variants[0]);
-  }
-  return Number(product.price) || 0;
-}
-
-/**
- * Returns whether the active variant (or product) is on sale.
- * For a product with variants: returns true if any active variant is on sale.
+ * Returns whether the active variant (or product) is marked as on sale.
+ * Returns true if:
+ * 1. The selected variant has is_sale === true
+ * 2. Or any variant in product.variants has is_sale === true
+ * 3. Or product itself has isClearance === true
+ * 4. Or product belongs to '限時特價' category (categoryName === '限時特價' or categoryId/slug === 'sale' or 'clearance')
+ * Note: Having clearance_price alone does NOT make a product on sale.
  */
 export function isItemOnSale(
   product: Product,
@@ -71,15 +51,27 @@ export function isItemOnSale(
   if (selectedVariant) {
     return Boolean(selectedVariant.is_sale);
   }
-  if (product.variants && product.variants.length > 0) {
-    return product.variants.some((v) => Boolean(v.is_sale));
-  }
-  return Boolean(product.isClearance);
+  const hasVariantSale = Boolean(
+    product.variants && product.variants.some((v) => Boolean(v.is_sale))
+  );
+  const isProductLevelSale = Boolean(
+    product.isClearance ||
+    product.categoryName === '限時特價' ||
+    product.categorySlug === 'sale' ||
+    product.categorySlug === 'clearance' ||
+    product.categoryId === 'sale' ||
+    product.categoryId === 'clearance'
+  );
+  return hasVariantSale || isProductLevelSale;
 }
 
 /**
  * Returns whether the active variant (or product) is marked as new.
- * For a product with variants: returns true if any active variant is new.
+ * Returns true if:
+ * 1. The selected variant has is_new === true
+ * 2. Or any variant in product.variants has is_new === true
+ * 3. Or product itself has isNewArrival === true
+ * 4. Or product belongs to '新品上市' category
  */
 export function isItemNew(
   product: Product,
@@ -88,10 +80,16 @@ export function isItemNew(
   if (selectedVariant) {
     return Boolean(selectedVariant.is_new);
   }
-  if (product.variants && product.variants.length > 0) {
-    return product.variants.some((v) => Boolean(v.is_new));
-  }
-  return Boolean(product.isNewArrival);
+  const hasVariantNew = Boolean(
+    product.variants && product.variants.some((v) => Boolean(v.is_new))
+  );
+  const isProductLevelNew = Boolean(
+    product.isNewArrival ||
+    product.categoryName === '新品上市' ||
+    product.categorySlug === 'new-arrivals' ||
+    product.categoryId === 'new-arrivals'
+  );
+  return hasVariantNew || isProductLevelNew;
 }
 
 /**
@@ -103,14 +101,4 @@ export function getCartItemUnitPrice(item: CartItem): number {
     return getVariantEffectivePrice(item.selectedVariant);
   }
   return getProductEffectivePrice(item.product);
-}
-
-/**
- * Returns the normal price for a cart item:
- */
-export function getCartItemNormalPrice(item: CartItem): number {
-  if (item.selectedVariant) {
-    return getVariantNormalPrice(item.selectedVariant);
-  }
-  return getProductNormalPrice(item.product);
 }

@@ -3,11 +3,10 @@ import { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import {
   getProductEffectivePrice,
-  getProductNormalPrice,
   isItemNew,
   isItemOnSale,
 } from '../utils/priceUtils';
-import { MapPin, Sparkles, Eye, ShoppingBag, Check } from 'lucide-react';
+import { Sparkles, Eye, ShoppingBag, Check } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -22,9 +21,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
 
   // Price calculations
   const effectivePrice = getProductEffectivePrice(product);
-  const normalPrice = getProductNormalPrice(product);
   const isSale = isItemOnSale(product);
   const isNew = isItemNew(product);
+
+  // Weight display: unified format 「重量：0.4kg」
+  const cardWeight =
+    product.variants && product.variants.length > 0 && product.variants[0].weight != null
+      ? product.variants[0].weight
+      : product.weight != null
+      ? product.weight
+      : null;
+  const displayWeight = cardWeight != null ? `重量：${cardWeight}kg` : null;
+  const expiryText = product.expiryDate || product.shortDescription;
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -109,28 +117,31 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
       {/* Content Section */}
       <div className="flex flex-col flex-1 p-4 md:p-5 justify-between">
         <div className="flex flex-col flex-1">
-          {/* Brand & Origin Row */}
-          <div className="flex items-center justify-between text-xs text-[#263B3F]/65 mb-1.5 shrink-0">
-            <span className="font-semibold tracking-wider text-[#438DB8] uppercase text-[11px]">
-              {product.brand}
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-[#263B3F]/60">
-              <MapPin className="w-3 h-3 text-[#438DB8]" />
-              {product.origin.split(',')[0]}
-            </span>
-          </div>
-
-          {/* Product Title - full display on mobile, pushes down evenly */}
-          <div className="flex-1 flex flex-col justify-start">
-            <h3 className="text-sm md:text-[15px] font-medium text-[#263B3F] lg:line-clamp-2 mb-2 group-hover:text-[#438DB8] transition-colors leading-snug break-words">
+          {/* 1. 商品名稱 */}
+          <div className="flex-1 flex flex-col justify-start mb-1.5">
+            <h3 className="text-sm md:text-[15px] font-medium text-[#263B3F] lg:line-clamp-2 group-hover:text-[#438DB8] transition-colors leading-snug break-words">
               {product.name}
             </h3>
           </div>
 
-          {/* Short Description */}
-          {product.shortDescription && (
-            <p className="text-xs text-[#263B3F]/60 line-clamp-1 mb-3 shrink-0">
-              {product.shortDescription}
+          {/* 2. 品牌 */}
+          <div className="text-xs text-[#263B3F]/65 mb-1.5 shrink-0">
+            <span className="font-semibold tracking-wider text-[#438DB8] uppercase text-[11px]">
+              {product.brand}
+            </span>
+          </div>
+
+          {/* 3. 有效期限 */}
+          {expiryText && (
+            <p className="text-xs text-[#263B3F]/60 line-clamp-1 mb-1 shrink-0">
+              {expiryText}
+            </p>
+          )}
+
+          {/* 4. 重量 (樣式與有效期限完全一致) */}
+          {displayWeight && (
+            <p className="text-xs text-[#263B3F]/60 line-clamp-1 mb-2 shrink-0">
+              {displayWeight}
             </p>
           )}
         </div>
@@ -141,11 +152,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onSelect }) =
             <span className={`text-base md:text-lg font-bold tracking-tight ${isSale ? 'text-[#438DB8]' : 'text-[#263B3F]'}`}>
               NT$ {effectivePrice.toLocaleString()}
             </span>
-            {isSale && normalPrice > effectivePrice && (
-              <span className="text-[11px] text-[#263B3F]/50">
-                正常售價 NT$ {normalPrice.toLocaleString()}
-              </span>
-            )}
           </div>
 
           {/* Quick Add Button (Always visible on mobile or compact) */}

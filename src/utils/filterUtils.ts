@@ -42,10 +42,7 @@ export function matchesCategory(
     catSlug === 'clearance' ||
     catId === 'sale' ||
     catId === 'clearance' ||
-    catName === '限時特價' ||
-    catName.includes('特價') ||
-    catName.includes('清倉') ||
-    catName.includes('出清')
+    catName === '限時特價'
   ) {
     return isItemOnSale(product);
   }
@@ -143,11 +140,10 @@ export function filterProducts(
     result = result.filter((p) => {
       const matchName = p.name.toLowerCase().includes(q);
       const matchBrand = p.brand.toLowerCase().includes(q);
-      const matchOrigin = p.origin.toLowerCase().includes(q);
       const matchShortDesc = p.shortDescription.toLowerCase().includes(q);
       const matchTags = p.tags.some((tag) => tag.toLowerCase().includes(q));
       const matchFeatures = p.features?.some((f) => f.toLowerCase().includes(q));
-      return matchName || matchBrand || matchOrigin || matchShortDesc || matchTags || matchFeatures;
+      return matchName || matchBrand || matchShortDesc || matchTags || matchFeatures;
     });
   }
 
@@ -176,15 +172,13 @@ export function searchGlobalProducts(products: Product[], query: string): Produc
     const matchDesc = p.description.toLowerCase().includes(q);
     const matchShortDesc = p.shortDescription.toLowerCase().includes(q);
     const matchTags = p.tags.some((tag) => tag.toLowerCase().includes(q));
-    const matchOrigin = p.origin.toLowerCase().includes(q);
     return (
       matchName ||
       matchBrand ||
       matchCategory ||
       matchDesc ||
       matchShortDesc ||
-      matchTags ||
-      matchOrigin
+      matchTags
     );
   });
 }

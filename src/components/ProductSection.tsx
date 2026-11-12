@@ -21,6 +21,11 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
   // Ensure we display up to 5 products
   const displayProducts = products.slice(0, 5);
 
+  // If there are no products, do not render the section at all
+  if (displayProducts.length === 0) {
+    return null;
+  }
+
   return (
     <section
       id={sectionId}
@@ -45,33 +50,27 @@ export const ProductSection: React.FC<ProductSectionProps> = ({
         </div>
 
         {/* Product Cards Grid: 2 on mobile, 4 on tablet (md), 5 on desktop (lg) */}
-        {displayProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-4.5">
-            {displayProducts.map((product, index) => {
-              let itemVisibility = 'block';
-              if (index >= 4) {
-                // 5th item: desktop only
-                itemVisibility = 'hidden lg:block';
-              } else if (index >= 2) {
-                // 3rd & 4th items: tablet and desktop only
-                itemVisibility = 'hidden md:block';
-              }
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 lg:gap-4.5">
+          {displayProducts.map((product, index) => {
+            let itemVisibility = 'block';
+            if (index >= 4) {
+              // 5th item: desktop only
+              itemVisibility = 'hidden lg:block';
+            } else if (index >= 2) {
+              // 3rd & 4th items: tablet and desktop only
+              itemVisibility = 'hidden md:block';
+            }
 
-              return (
-                <div key={product.id} className={`h-full ${itemVisibility}`}>
-                  <ProductCard
-                    product={product}
-                    onSelect={() => onSelectProduct(product)}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="py-8 text-center text-xs text-[#263B3F]/50 bg-white/40 rounded-xl border border-dashed border-[#263B3F]/12">
-            目前此分類尚無商品
-          </div>
-        )}
+            return (
+              <div key={product.id} className={`h-full ${itemVisibility}`}>
+                <ProductCard
+                  product={product}
+                  onSelect={() => onSelectProduct(product)}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );

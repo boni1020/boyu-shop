@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Category, Product, CategoryType } from '../types';
-import { supabase } from '../services/supabase';
 import { matchesCategory } from '../utils/filterUtils';
 
 interface CategoryContextType {
@@ -14,7 +13,7 @@ interface CategoryContextType {
 
 const CategoryContext = createContext<CategoryContextType | undefined>(undefined);
 
-// Default curated aesthetic imagery for categories if Supabase image_url is empty
+// 官網各分類代表性主題視覺與描述
 const CATEGORY_DEFAULT_IMAGES: Record<string, { hero: string; english: string; desc: string }> = {
   '新品上市': {
     hero: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1800&q=80',
@@ -58,121 +57,112 @@ const CATEGORY_DEFAULT_IMAGES: Record<string, { hero: string; english: string; d
   },
 };
 
+/**
+ * 官網固定 7 大分類（純前端靜態定義，不再查詢 Supabase）
+ */
+export const OFFICIAL_CATEGORIES: Category[] = [
+  {
+    id: 'new-arrivals',
+    name: '新品上市',
+    slug: 'new-arrivals',
+    type: 'new' as CategoryType,
+    sort_order: 1,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['新品上市'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['新品上市'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['新品上市'].hero,
+    image_url: null,
+  },
+  {
+    id: 'life',
+    name: '生活補給',
+    slug: 'life',
+    type: 'regular' as CategoryType,
+    sort_order: 2,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['生活補給'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['生活補給'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['生活補給'].hero,
+    image_url: null,
+  },
+  {
+    id: 'beauty',
+    name: '精選美研',
+    slug: 'beauty',
+    type: 'regular' as CategoryType,
+    sort_order: 3,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['精選美研'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['精選美研'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['精選美研'].hero,
+    image_url: null,
+  },
+  {
+    id: 'accessories',
+    name: '舒適配飾',
+    slug: 'accessories',
+    type: 'regular' as CategoryType,
+    sort_order: 4,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['舒適配飾'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['舒適配飾'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['舒適配飾'].hero,
+    image_url: null,
+  },
+  {
+    id: 'essentials',
+    name: '日之選用',
+    slug: 'essentials',
+    type: 'regular' as CategoryType,
+    sort_order: 5,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['日之選用'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['日之選用'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['日之選用'].hero,
+    image_url: null,
+  },
+  {
+    id: 'food-pantry',
+    name: '食光選物',
+    slug: 'food-pantry',
+    type: 'regular' as CategoryType,
+    sort_order: 6,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['食光選物'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['食光選物'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['食光選物'].hero,
+    image_url: null,
+  },
+  {
+    id: 'sale',
+    name: '限時特價',
+    slug: 'sale',
+    type: 'sale' as CategoryType,
+    sort_order: 7,
+    is_active: true,
+    description: CATEGORY_DEFAULT_IMAGES['限時特價'].desc,
+    englishName: CATEGORY_DEFAULT_IMAGES['限時特價'].english,
+    story: '',
+    heroImage: CATEGORY_DEFAULT_IMAGES['限時特價'].hero,
+    image_url: null,
+  },
+];
+
 export const CategoryProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>(OFFICIAL_CATEGORIES);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error] = useState<string | null>(null);
 
   const fetchCategories = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      if (!supabase) {
-        throw new Error('Supabase client 未初始化，請確認 VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY 設定');
-      }
-
-      const { data: rawData, error: supabaseError } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (supabaseError) {
-        throw supabaseError;
-      }
-
-      if (!Array.isArray(rawData)) {
-        throw new Error('回傳之分類資料格式不符');
-      }
-
-      const formattedSupabaseCategories: Category[] = rawData.map((item: any) => {
-        const fallbackMeta = CATEGORY_DEFAULT_IMAGES[item.name] || {
-          hero: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1800&q=80',
-          english: item.slug ? item.slug.toUpperCase() : 'AUSTRALIAN LIVING',
-          desc: '來自澳洲海岸與陽光森林的純淨生活選物。',
-        };
-
-        return {
-          id: String(item.id),
-          name: item.name,
-          slug: item.slug || String(item.id),
-          type: 'regular' as CategoryType,
-          sort_order: item.sort_order ?? 0,
-          is_active: item.is_active ?? true,
-          description: item.description || fallbackMeta.desc,
-          englishName: fallbackMeta.english || (item.slug ? item.slug.toUpperCase() : item.name),
-          story: item.story || '',
-          heroImage: item.image_url || fallbackMeta.hero,
-          image_url: item.image_url || null,
-        };
-      });
-
-      // 7 個固定順序分類：
-      // 1. 新品上市 (動態專區, type: 'new')
-      // 2~6. Supabase 5 大商品主分類 (依 sort_order 排序: 生活補給, 精選美研, 舒適配飾, 日之選用, 食光選物)
-      // 7. 限時特價 (動態專區, type: 'sale')
-      const newArrivalsCategory: Category = {
-        id: 'new-arrivals',
-        name: '新品上市',
-        slug: 'new-arrivals',
-        type: 'new',
-        sort_order: -1,
-        is_active: true,
-        description: CATEGORY_DEFAULT_IMAGES['新品上市'].desc,
-        englishName: CATEGORY_DEFAULT_IMAGES['新品上市'].english,
-        story: '',
-        heroImage: CATEGORY_DEFAULT_IMAGES['新品上市'].hero,
-        image_url: null,
-      };
-
-      const saleCategory: Category = {
-        id: 'sale',
-        name: '限時特價',
-        slug: 'sale',
-        type: 'sale',
-        sort_order: 999,
-        is_active: true,
-        description: CATEGORY_DEFAULT_IMAGES['限時特價'].desc,
-        englishName: CATEGORY_DEFAULT_IMAGES['限時特價'].english,
-        story: '',
-        heroImage: CATEGORY_DEFAULT_IMAGES['限時特價'].hero,
-        image_url: null,
-      };
-
-      const TARGET_CATEGORY_ORDER = [
-        '新品上市',
-        '生活補給',
-        '精選美研',
-        '舒適配飾',
-        '日之選用',
-        '食光選物',
-        '限時特價',
-      ];
-
-      const allCategories: Category[] = [
-        newArrivalsCategory,
-        ...formattedSupabaseCategories,
-        saleCategory,
-      ];
-
-      allCategories.sort((a, b) => {
-        const indexA = TARGET_CATEGORY_ORDER.indexOf(a.name);
-        const indexB = TARGET_CATEGORY_ORDER.indexOf(b.name);
-        const orderA = indexA !== -1 ? indexA : 99;
-        const orderB = indexB !== -1 ? indexB : 99;
-        return orderA - orderB;
-      });
-
-      console.log('[Supabase] categories (7 categories created in exact order)', allCategories);
-      setCategories(allCategories);
-    } catch (err: any) {
-      console.error('Failed to fetch categories from Supabase:', err);
-      setError(err?.message || '無法從 Supabase 取得分類資料');
-      // STRICT: No fake data fallback. Empty categories array on error.
-      setCategories([]);
-    } finally {
-      setIsLoading(false);
-    }
+    // 靜態分類已直接載入，不再向 Supabase 發起網路請求
+    setCategories(OFFICIAL_CATEGORIES);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {

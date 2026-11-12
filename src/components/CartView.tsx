@@ -1,24 +1,19 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
 import { Product } from '../types';
-import { getCartItemUnitPrice, getCartItemNormalPrice } from '../utils/priceUtils';
-import { Trash2, Plus, Minus, ArrowRight, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { getCartItemUnitPrice } from '../utils/priceUtils';
+import { Trash2, Plus, Minus, ArrowRight, ShoppingBag } from 'lucide-react';
 
 interface CartViewProps {
-  onNavigateCheckout: () => void;
   onNavigateHome: () => void;
   onSelectProduct: (product: Product) => void;
 }
 
 export const CartView: React.FC<CartViewProps> = ({
-  onNavigateCheckout,
   onNavigateHome,
   onSelectProduct,
 }) => {
   const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, cartItemCount } = useCart();
-
-  const shippingFee = cart.length === 0 ? 0 : 60;
-  const finalTotal = cartTotal + shippingFee;
 
   if (cart.length === 0) {
     return (
@@ -51,7 +46,7 @@ export const CartView: React.FC<CartViewProps> = ({
             購物車清單
           </h1>
           <p className="text-xs sm:text-sm text-[#263B3F]/60 mt-1">
-            共選購了 <span className="font-semibold text-[#438DB8]">{cartItemCount}</span> 件
+            共選購了 <span className="font-semibold text-[#438DB8]">{cartItemCount}</span> 件商品
           </p>
         </div>
         <button
@@ -69,10 +64,6 @@ export const CartView: React.FC<CartViewProps> = ({
           {cart.map((cartItem) => {
             const { cartItemId, product, quantity, selectedVariant, selectedOptions } = cartItem;
             const unitPrice = getCartItemUnitPrice(cartItem);
-            const normalPrice = getCartItemNormalPrice(cartItem);
-            const isSale = selectedVariant
-              ? Boolean(selectedVariant.is_sale)
-              : Boolean(product.isClearance);
             const subtotal = unitPrice * quantity;
 
             return (
@@ -126,11 +117,6 @@ export const CartView: React.FC<CartViewProps> = ({
 
                   <div className="flex items-baseline gap-2 text-xs text-[#263B3F]/60 mt-1">
                     <span>單價：NT$ {unitPrice.toLocaleString()}</span>
-                    {isSale && normalPrice > unitPrice && (
-                      <span className="text-[11px] text-[#263B3F]/50">
-                        (正常售價 NT$ {normalPrice.toLocaleString()})
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -192,50 +178,41 @@ export const CartView: React.FC<CartViewProps> = ({
           </div>
         </div>
 
-        {/* Right Column: Order Summary (4 cols) */}
+        {/* Right Column: Cart Summary (4 cols) */}
         <div className="lg:col-span-4">
           <div className="bg-white rounded-2xl p-6 border border-[#263B3F]/12 shadow-sm sticky top-28">
             <h2 className="text-lg font-bold text-[#263B3F] font-serif-brand pb-4 border-b border-[#263B3F]/10">
-              訂單金額摘要
+              購物車摘要
             </h2>
 
             <div className="space-y-3 py-4 text-xs text-[#263B3F]">
               <div className="flex justify-between">
-                <span className="text-[#263B3F]/70">商品總金額</span>
-                <span className="font-semibold">NT$ {cartTotal.toLocaleString()}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#263B3F]/70">全台運費</span>
-                <span className="font-semibold">NT$ {shippingFee}</span>
+                <span className="text-[#263B3F]/70">商品件數</span>
+                <span className="font-semibold">{cartItemCount} 件</span>
               </div>
             </div>
 
             <div className="pt-4 border-t border-[#263B3F]/10 mb-6">
               <div className="flex justify-between items-baseline">
-                <span className="text-sm font-bold text-[#263B3F]">應付總金額</span>
+                <span className="text-sm font-bold text-[#263B3F]">商品總額</span>
                 <div className="text-right">
                   <span className="text-2xl font-bold text-[#438DB8]">
-                    NT$ {finalTotal.toLocaleString()}
+                    NT$ {cartTotal.toLocaleString()}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Checkout CTA */}
+            {/* Continue Shopping Action */}
             <button
               type="button"
-              id="btn-cart-proceed-checkout"
-              onClick={onNavigateCheckout}
+              id="btn-cart-continue-shopping"
+              onClick={onNavigateHome}
               className="w-full py-3.5 px-6 rounded-xl bg-[#438DB8] hover:bg-[#438DB8]/90 text-white font-semibold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer group"
             >
-              <span>前往結帳</span>
+              <span>繼續選購商品</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
-
-            <div className="mt-4 pt-4 border-t border-[#263B3F]/8 flex items-center gap-2 text-[11px] text-[#263B3F]/60">
-              <ShieldCheck className="w-4 h-4 text-[#2B8D9C] shrink-0" />
-              <span>支援 7-11 取貨與 ATM 銀行轉帳驗證</span>
-            </div>
           </div>
         </div>
       </div>

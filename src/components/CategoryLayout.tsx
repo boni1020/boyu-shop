@@ -3,7 +3,7 @@ import { Category, Product, CategoryId } from '../types';
 import { BrandFilter } from './BrandFilter';
 import { ProductCard } from './ProductCard';
 import { getBrandsForCategory, filterProducts, matchesCategory } from '../utils/filterUtils';
-import { ChevronRight, ArrowUpDown, ShoppingCart, ChevronDown, ChevronUp, Check } from 'lucide-react';
+import { ArrowUpDown, ShoppingCart, ChevronDown, ChevronUp, Check } from 'lucide-react';
 
 interface CategoryLayoutProps {
   category: Category;
@@ -70,77 +70,16 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
     });
   }, [allProducts, category, selectedBrand, sortBy]);
 
-  // Total products in this category (unfiltered by brand)
-  const totalCategoryProductsCount = useMemo(() => {
-    return allProducts.filter((p) => matchesCategory(p, category)).length;
-  }, [allProducts, category]);
-
-  const bannerImage =
-    category.heroImage ||
-    category.image_url ||
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=2000&q=80';
-
   return (
     <div className="w-full pb-20">
-      {/* Category Hero Banner - Compact Height (Mobile ~200px, Desktop ~300px) */}
-      <div className="relative h-[200px] md:h-[300px] w-full overflow-hidden bg-[#438DB8]">
-        <img
-          src={bannerImage}
-          alt={category.name}
-          className="absolute inset-0 w-full h-full object-cover object-center opacity-35 mix-blend-multiply scale-105"
-          referrerPolicy="no-referrer"
-        />
-        {/* Soft coastal gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#263B3F]/90 via-[#263B3F]/50 to-transparent" />
-
-        <div className="relative max-w-7xl mx-auto h-full px-4 sm:px-6 lg:px-8 flex flex-col justify-end pb-6 md:pb-8 text-white">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-xs text-white/80 mb-2" aria-label="Breadcrumb">
-            <button
-              type="button"
-              onClick={onNavigateHome}
-              className="hover:text-[#FFB94B] transition-colors cursor-pointer"
-            >
-              首頁
-            </button>
-            <ChevronRight className="w-3 h-3 text-white/40" />
-            <span className="text-white font-medium">{category.name}</span>
-            {selectedBrand !== 'all' && (
-              <>
-                <ChevronRight className="w-3 h-3 text-white/40" />
-                <span className="text-[#FFB94B] font-medium">{selectedBrand}</span>
-              </>
-            )}
-          </nav>
-
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.25em] text-[#FFB94B] font-semibold mb-1">
-              {category.englishName || category.slug || 'AUSTRALIAN LIVING'}
-            </div>
-            <h1 className="text-2xl md:text-4xl font-bold tracking-tight text-white font-serif-brand">
-              {category.name}
-            </h1>
-            <p className="mt-1.5 text-xs md:text-sm text-white/85 max-w-2xl leading-relaxed line-clamp-2">
-              {category.description}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content Area: Left Sidebar (Brand + Sort for Desktop) & Right Products */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
           {/* Left Column: Sticky Brand Filter + Sort Sidebar (Desktop only, lg:block) */}
           <div className="hidden lg:block lg:w-64 shrink-0">
-            <div className="sticky top-[135px] sm:top-[160px] lg:top-[176px] bg-white/70 backdrop-blur-xs p-4 lg:p-5 rounded-xl sm:rounded-2xl border border-[#263B3F]/10 shadow-[0_2px_16px_rgba(38,59,63,0.03)]">
-              <BrandFilter
-                brands={dynamicBrands}
-                selectedBrand={selectedBrand}
-                onSelectBrand={onSelectBrand}
-              />
-
-              {/* Sort Control in the Left Sidebar */}
-              <div className="pt-4 mt-4 border-t border-[#263B3F]/12">
+            <div className="sticky top-28 bg-white/70 backdrop-blur-xs p-4 lg:p-5 rounded-xl sm:rounded-2xl border border-[#263B3F]/10 shadow-[0_2px_16px_rgba(38,59,63,0.03)]">
+              {/* 1. Sort Control in the Left Sidebar (排序移到最上方) */}
+              <div className="pb-4 mb-4 border-b border-[#263B3F]/12">
                 <div className="flex items-center gap-1.5 mb-2">
                   <ArrowUpDown className="w-3.5 h-3.5 text-[#2B8D9C]" />
                   <span className="text-xs sm:text-sm font-semibold text-[#263B3F] tracking-wide">
@@ -160,15 +99,103 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
                   <option value="newest">新品優先</option>
                 </select>
               </div>
+
+              {/* 2. BrandFilter (品牌移到排序下方) */}
+              <BrandFilter
+                brands={dynamicBrands}
+                selectedBrand={selectedBrand}
+                onSelectBrand={onSelectBrand}
+              />
             </div>
           </div>
 
           {/* Right Column: Product Grid */}
           <div className="flex-1 min-w-0">
-            {/* Mobile & Tablet: Brand Filter Popover & Sort Row (< lg) */}
+            {/* Mobile & Tablet: Sort & Brand Filter Popover Row (< lg) */}
             <div className="block lg:hidden relative mb-4 sm:mb-6 z-30">
               <div className="flex items-center gap-2 sm:gap-3">
-                {/* Brand Filter Toggle Button */}
+                {/* 1. Sort Toggle Button & Popover (排序在左/前) */}
+                <div ref={sortPopoverRef} className="flex-1 relative">
+                  <button
+                    type="button"
+                    id="btn-mobile-sort-accordion"
+                    onClick={() => {
+                      setIsMobileBrandOpen(false);
+                      setIsMobileSortOpen((prev) => !prev);
+                    }}
+                    className={`w-full flex items-center justify-between px-3.5 py-2.5 bg-white border rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors cursor-pointer ${
+                      isMobileSortOpen
+                        ? 'border-[#438DB8] text-[#438DB8] ring-2 ring-[#438DB8]/20'
+                        : 'border-[#263B3F]/15 text-[#263B3F] hover:bg-[#263B3F]/3'
+                    }`}
+                    aria-expanded={isMobileSortOpen}
+                  >
+                    <span className="truncate">
+                      {sortBy === 'featured' ? '排序' : (SORT_OPTIONS.find((o) => o.value === sortBy)?.label || '排序')}
+                    </span>
+                    {isMobileSortOpen ? (
+                      <ChevronUp className="w-4 h-4 shrink-0 ml-1.5 text-[#438DB8]" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 shrink-0 ml-1.5 text-[#263B3F]/60" />
+                    )}
+                  </button>
+
+                  {/* Mobile & Tablet Sort Popover */}
+                  {isMobileSortOpen && (
+                    <div
+                      id="mobile-sort-accordion-content"
+                      className="absolute left-0 top-full mt-2 w-full sm:w-72 max-w-[calc(100vw-2rem)] bg-white border border-[#263B3F]/15 rounded-xl shadow-2xl z-50 p-3.5"
+                      style={{ backgroundColor: '#ffffff' }}
+                    >
+                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#263B3F]/10">
+                        <span className="text-xs font-semibold text-[#263B3F]/75">
+                          商品排序
+                        </span>
+                        {sortBy !== 'featured' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSortBy('featured');
+                              setIsMobileSortOpen(false);
+                            }}
+                            className="text-xs text-[#438DB8] font-medium hover:underline cursor-pointer"
+                          >
+                            恢復預設
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex flex-col gap-1 pr-1">
+                        {SORT_OPTIONS.map((opt) => {
+                          const isSelected = sortBy === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              id={`mobile-sort-option-${opt.value}`}
+                              onClick={() => {
+                                setSortBy(opt.value);
+                                setIsMobileSortOpen(false);
+                              }}
+                              className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-colors text-left cursor-pointer ${
+                                isSelected
+                                  ? 'bg-[#438DB8]/10 text-[#438DB8] font-semibold'
+                                  : 'text-[#263B3F]/85 hover:bg-[#263B3F]/5'
+                              }`}
+                            >
+                              <span className="truncate">{opt.label}</span>
+                              {isSelected && (
+                                <Check className="w-4 h-4 shrink-0 text-[#438DB8] stroke-[2.5] ml-2" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. Brand Filter Toggle Button & Popover (品牌在右/後) */}
                 <div ref={brandPopoverRef} className="flex-1 relative">
                   <button
                     type="button"
@@ -194,11 +221,11 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
                     )}
                   </button>
 
-                  {/* Mobile & Tablet Brand Popover: Floating Overlay that does NOT push products down */}
+                  {/* Mobile & Tablet Brand Popover */}
                   {isMobileBrandOpen && (
                     <div
                       id="mobile-brand-accordion-content"
-                      className="absolute left-0 top-full mt-2 w-full sm:w-80 max-w-[calc(100vw-2rem)] bg-white border border-[#263B3F]/15 rounded-xl shadow-2xl z-50 p-3.5"
+                      className="absolute right-0 top-full mt-2 w-full sm:w-80 max-w-[calc(100vw-2rem)] bg-white border border-[#263B3F]/15 rounded-xl shadow-2xl z-50 p-3.5"
                       style={{ backgroundColor: '#ffffff' }}
                     >
                       <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#263B3F]/10">
@@ -278,87 +305,6 @@ export const CategoryLayout: React.FC<CategoryLayoutProps> = ({
                                 </div>
                                 <span className="truncate">{b.name}</span>
                               </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Sort Toggle Button & Popover */}
-                <div ref={sortPopoverRef} className="flex-1 relative">
-                  <button
-                    type="button"
-                    id="btn-mobile-sort-accordion"
-                    onClick={() => {
-                      setIsMobileBrandOpen(false);
-                      setIsMobileSortOpen((prev) => !prev);
-                    }}
-                    className={`w-full flex items-center justify-between px-3.5 py-2.5 bg-white border rounded-xl text-xs sm:text-sm font-semibold shadow-xs transition-colors cursor-pointer ${
-                      isMobileSortOpen
-                        ? 'border-[#438DB8] text-[#438DB8] ring-2 ring-[#438DB8]/20'
-                        : 'border-[#263B3F]/15 text-[#263B3F] hover:bg-[#263B3F]/3'
-                    }`}
-                    aria-expanded={isMobileSortOpen}
-                  >
-                    <span className="truncate">
-                      {sortBy === 'featured' ? '排序' : (SORT_OPTIONS.find((o) => o.value === sortBy)?.label || '排序')}
-                    </span>
-                    {isMobileSortOpen ? (
-                      <ChevronUp className="w-4 h-4 shrink-0 ml-1.5 text-[#438DB8]" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 shrink-0 ml-1.5 text-[#263B3F]/60" />
-                    )}
-                  </button>
-
-                  {/* Mobile & Tablet Sort Popover: Floating Overlay that does NOT push products down */}
-                  {isMobileSortOpen && (
-                    <div
-                      id="mobile-sort-accordion-content"
-                      className="absolute right-0 top-full mt-2 w-full sm:w-72 max-w-[calc(100vw-2rem)] bg-white border border-[#263B3F]/15 rounded-xl shadow-2xl z-50 p-3.5"
-                      style={{ backgroundColor: '#ffffff' }}
-                    >
-                      <div className="flex items-center justify-between pb-2 mb-2 border-b border-[#263B3F]/10">
-                        <span className="text-xs font-semibold text-[#263B3F]/75">
-                          商品排序
-                        </span>
-                        {sortBy !== 'featured' && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSortBy('featured');
-                              setIsMobileSortOpen(false);
-                            }}
-                            className="text-xs text-[#438DB8] font-medium hover:underline cursor-pointer"
-                          >
-                            恢復預設
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-1 pr-1">
-                        {SORT_OPTIONS.map((opt) => {
-                          const isSelected = sortBy === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              id={`mobile-sort-option-${opt.value}`}
-                              onClick={() => {
-                                setSortBy(opt.value);
-                                setIsMobileSortOpen(false);
-                              }}
-                              className={`flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-xs sm:text-sm transition-colors text-left cursor-pointer ${
-                                isSelected
-                                  ? 'bg-[#438DB8]/10 text-[#438DB8] font-semibold'
-                                  : 'text-[#263B3F]/85 hover:bg-[#263B3F]/5'
-                              }`}
-                            >
-                              <span className="truncate">{opt.label}</span>
-                              {isSelected && (
-                                <Check className="w-4 h-4 shrink-0 text-[#438DB8] stroke-[2.5] ml-2" />
-                              )}
                             </button>
                           );
                         })}

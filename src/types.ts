@@ -36,17 +36,52 @@ export interface Brand {
   origin?: string;
 }
 
+/**
+ * 規格 variants 欄位格式 (src/data/products.json -> variants)
+ * 絕不包含成本、重量、利潤或計算公式
+ */
+export interface JsonProductVariant {
+  id: string;
+  name: string;
+  price: number;
+  clearance_price: number | null;
+  is_sale: boolean;
+  image: string | null;
+  weight?: number | null;
+  expiry_date?: string | null;
+}
+
+/**
+ * 商品欄位格式 (src/data/products.json)
+ * weight 單位為 kg (number)
+ */
+export interface JsonProduct {
+  id: string;
+  name: string;
+  brand: string;
+  category: string;
+  description: string | null;
+  image: string | null;
+  price: number;
+  clearance_price: number | null;
+  is_sale: boolean;
+  is_new: boolean;
+  weight?: number | null;
+  expiry_date?: string | null;
+  variants: JsonProductVariant[];
+}
+
 export interface ProductVariant {
   id: string;
   product_id: string;
   name: string;
-  weight: number | null;
   price: number;
   clearance_price: number | null;
-  is_new: boolean;
   is_sale: boolean;
-  option_values: Record<string, any> | null;
+  is_new: boolean;
   image?: string | null;
+  weight?: number | null;
+  option_values?: Record<string, any> | null;
   expiry_date?: string | null;
 }
 
@@ -69,7 +104,7 @@ export interface Product {
   hoverImageUrl?: string;
   description: string;
   shortDescription: string;
-  origin: string; // e.g. "Byron Bay, NSW", "Melbourne, VIC", "Margaret River, WA"
+  origin?: string;
   tags: string[];
   inStock: boolean;
   isActive?: boolean;
@@ -79,7 +114,7 @@ export interface Product {
   variants?: ProductVariant[];
   options?: ProductOption[];
   volumeOrSize?: string;
-  weight?: string;
+  weight?: number | null;
   shelfLife?: string;
   expiryDate?: string;
   specifications?: string;
@@ -96,34 +131,6 @@ export interface CartItem {
   quantity: number;
   selectedVariant?: ProductVariant;
   selectedOptions?: Record<string, string>;
-}
-
-export interface CustomerInfo {
-  name: string;
-  phone: string;
-  email: string;
-  sevenElevenStore: string;
-  transferLast5Digits: string;
-}
-
-export interface Order {
-  id: string;
-  createdAt: string;
-  customer: CustomerInfo;
-  items: CartItem[];
-  subtotal: number;
-  shippingFee: number;
-  totalAmount: number;
-  status: 'pending_transfer' | 'confirmed' | 'shipped';
-}
-
-export interface BankConfig {
-  bankName: string;
-  bankCode: string;
-  branchName: string;
-  accountNumber: string;
-  accountName: string;
-  notes?: string;
 }
 
 export interface BrandStats {

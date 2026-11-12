@@ -3,9 +3,7 @@ import { Product, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import {
   getVariantEffectivePrice,
-  getVariantNormalPrice,
   getProductEffectivePrice,
-  getProductNormalPrice,
   isItemOnSale,
   isItemNew,
 } from '../utils/priceUtils';
@@ -17,6 +15,9 @@ interface ProductDetailModalProps {
   onSelectCategory?: (categoryId: string) => void;
   onSelectBrand?: (brand: string) => void;
 }
+
+const META_TAG_CLASS =
+  'text-xs text-[#263B3F]/70 bg-white/70 px-2.5 py-1 rounded-md border border-[#263B3F]/10 font-normal leading-normal shrink-0';
 
 export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   product,
@@ -58,13 +59,21 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   // Active price and attributes depending on selected variant or base product
   const activePrice = getProductEffectivePrice(product, selectedVariant);
-  const activeNormalPrice = getProductNormalPrice(product, selectedVariant);
   const activeIsNew = isItemNew(product, selectedVariant);
   const activeIsSale = isItemOnSale(product, selectedVariant);
-  const activeWeight = selectedVariant && selectedVariant.weight != null
-    ? `${selectedVariant.weight} kg`
-    : product.weight;
-  const activeExpiryDate = selectedVariant?.expiry_date || product.expiryDate;
+  const rawActiveWeight =
+    selectedVariant && selectedVariant.weight != null
+      ? selectedVariant.weight
+      : product.weight != null
+        ? product.weight
+        : null;
+  const activeWeightText = rawActiveWeight != null ? `重量：${rawActiveWeight}kg` : null;
+  const activeExpiryDate =
+    selectedVariant?.expiry_date ||
+    product.expiryDate ||
+    (product.description && /有效期限|\d{4}\.\d{2}/.test(product.description)
+      ? product.description
+      : undefined);
 
   const handleVariantSelect = (variant: ProductVariant) => {
     setSelectedVariant(variant);
@@ -174,27 +183,26 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <span className="text-xl sm:text-2xl font-bold text-[#438DB8]">
                 NT$ {activePrice.toLocaleString()}
               </span>
-              {activeIsSale && activeNormalPrice > activePrice && (
-                <span className="text-xs sm:text-sm text-[#263B3F]/50">
-                  正常售價 NT$ {activeNormalPrice.toLocaleString()}
-                </span>
+              {(activeExpiryDate || activeWeightText) && (
+                <div className="flex items-center gap-2 sm:gap-2.5 ml-auto flex-wrap">
+                  {/* 1. 有效期限 (左側) */}
+                  {activeExpiryDate && (
+                    <span className={META_TAG_CLASS}>
+                      {activeExpiryDate}
+                    </span>
+                  )}
+                  {/* 2. 重量 (右側) */}
+                  {activeWeightText && (
+                    <span className={META_TAG_CLASS}>
+                      {activeWeightText}
+                    </span>
+                  )}
+                </div>
               )}
-              <div className="flex items-center gap-2 ml-auto flex-wrap">
-                {activeWeight && (
-                  <span className="text-xs text-[#263B3F]/60 bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
-                    重量：{activeWeight}
-                  </span>
-                )}
-                {activeExpiryDate && (
-                  <span className="text-xs text-[#263B3F]/60 bg-white/70 px-2 py-0.5 rounded-md border border-[#263B3F]/10">
-                    有效期限：{activeExpiryDate}
-                  </span>
-                )}
-              </div>
             </div>
 
             {/* Description */}
-            {Boolean(product.description && product.description.trim()) && (
+            {Boolean(product.description && product.description.trim() && product.description !== activeExpiryDate) && (
               <div className="mb-3.5 sm:mb-5">
                 <p className="text-xs sm:text-sm text-[#263B3F]/80 leading-relaxed">
                   {product.description}
@@ -221,26 +229,23 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   {product.variants.map((v) => {
                     const isSelected = selectedVariant?.id === v.id;
                     const vPrice = getVariantEffectivePrice(v);
-                    const vNormalPrice = getVariantNormalPrice(v);
                     return (
                       <button
                         key={v.id}
                         type="button"
                         onClick={() => handleVariantSelect(v)}
-                        className={`p-2.5 rounded-xl text-left border transition-all duration-150 cursor-pointer relative flex flex-col justify-between ${
-                          isSelected
+                        className={`p-2.5 rounded-xl text-left border transition-all duration-150 cursor-pointer relative flex flex-col justify-between ${isSelected
                             ? 'bg-[#438DB8] text-white border-[#438DB8] shadow-xs ring-2 ring-[#438DB8]/20'
                             : 'bg-white text-[#263B3F] border-[#263B3F]/15 hover:border-[#438DB8]/60 hover:bg-[#F6F3EA]'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center justify-between gap-1 mb-1">
                           <span className={`text-xs font-semibold ${isSelected ? 'text-white' : 'text-[#263B3F]'}`}>
                             {v.name}
                           </span>
                           {v.is_sale && (
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                              isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
-                            }`}>
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+                              }`}>
                               特惠
                             </span>
                           )}
@@ -251,17 +256,19 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                             <span className={`font-bold ${isSelected ? 'text-white' : 'text-[#438DB8]'}`}>
                               NT$ {vPrice.toLocaleString()}
                             </span>
-                            {v.is_sale && vNormalPrice > vPrice && (
-                              <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-[#263B3F]/50'}`}>
-                                正常售價 NT$ {vNormalPrice.toLocaleString()}
+                          </div>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {v.expiry_date != null && (
+                              <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-[#263B3F]/50'}`}>
+                                {v.expiry_date}
+                              </span>
+                            )}
+                            {v.weight != null && (
+                              <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-[#263B3F]/50'}`}>
+                                重量：{v.weight}kg
                               </span>
                             )}
                           </div>
-                          {v.weight != null && (
-                            <span className={`text-[10px] ${isSelected ? 'text-white/80' : 'text-[#263B3F]/50'}`}>
-                              {v.weight} kg
-                            </span>
-                          )}
                         </div>
                       </button>
                     );
@@ -275,7 +282,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <div className="pt-3 sm:pt-4 border-t border-[#263B3F]/10">
             <div className="flex items-center gap-3 sm:gap-4 mb-3">
               <span className="text-xs font-semibold text-[#263B3F]/80">選購數量</span>
-              
+
               {/* Quantity Picker [-] qty [+] */}
               <div className="inline-flex items-center border border-[#263B3F]/20 rounded-lg bg-white overflow-hidden shadow-xs">
                 <button
@@ -312,11 +319,10 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               type="button"
               id="btn-modal-add-to-cart"
               onClick={handleAddToCart}
-              className={`w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer ${
-                addedFeedback
+              className={`w-full py-2.5 sm:py-3.5 px-4 sm:px-6 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm cursor-pointer ${addedFeedback
                   ? 'bg-[#2B8D9C] text-white'
                   : 'bg-[#438DB8] hover:bg-[#438DB8]/90 text-white'
-              }`}
+                }`}
             >
               {addedFeedback ? (
                 <>

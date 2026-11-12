@@ -24,7 +24,7 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
   const { categories } = useCategories();
   const [searchInput, setSearchInput] = useState(searchQuery);
 
-  // Global search matches across name, brand, tags, description, origin
+  // Global search matches across name, brand, tags, description
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) return [];
     const q = searchQuery.trim().toLowerCase();
@@ -35,7 +35,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
       const matchDesc = p.description.toLowerCase().includes(q);
       const matchShortDesc = p.shortDescription.toLowerCase().includes(q);
       const matchTags = p.tags.some((tag) => tag.toLowerCase().includes(q));
-      const matchOrigin = p.origin.toLowerCase().includes(q);
       const matchFeatures = p.features?.some((f) => f.toLowerCase().includes(q));
       return (
         matchName ||
@@ -44,7 +43,6 @@ export const SearchResults: React.FC<SearchResultsProps> = ({
         matchDesc ||
         matchShortDesc ||
         matchTags ||
-        matchOrigin ||
         matchFeatures
       );
     });

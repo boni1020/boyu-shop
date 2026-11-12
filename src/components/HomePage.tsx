@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Category, CategoryId, Product } from '../types';
 import { useCategories } from '../context/CategoryContext';
-import { isItemOnSale } from '../utils/priceUtils';
 import { ProductSection } from './ProductSection';
+import { PackageOpen } from 'lucide-react';
 
 interface HomePageProps {
   allProducts: Product[];
@@ -17,165 +17,75 @@ export const HomePage: React.FC<HomePageProps> = ({
 }) => {
   const { categories, isProductInCategory } = useCategories();
 
-  // Helper to sort products by created_at DESC
-  const sortByCreatedAtDesc = (list: Product[]): Product[] => {
+  // Helper to sort products by created_at DESC, then by id for stable order
+  const sortByCreatedAtDesc = useCallback((list: Product[]): Product[] => {
     return [...list].sort((a, b) => {
-      const timeA = new Date(a.createdAt || a.rawSupabaseData?.created_at || 0).getTime();
-      const timeB = new Date(b.createdAt || b.rawSupabaseData?.created_at || 0).getTime();
+      const timeA = new Date(a.createdAt || 0).getTime();
+      const timeB = new Date(b.createdAt || 0).getTime();
       if (timeB !== timeA) return timeB - timeA;
       return a.id.localeCompare(b.id);
     });
-  };
+  }, []);
 
-  // Find category entities
-  const newArrivalsCat = useMemo(
-    () => categories.find((c) => c.type === 'new' || c.name === '新品上市' || c.id === 'new-arrivals'),
-    [categories]
-  );
-  const lifeCat = useMemo(
-    () => categories.find((c) => c.name === '生活補給' || c.slug === 'life' || c.slug === 'life-supplies'),
-    [categories]
-  );
-  const beautyCat = useMemo(
-    () => categories.find((c) => c.name === '精選美研' || c.slug === 'beauty' || c.slug === 'skincare'),
-    [categories]
-  );
-  const accessoriesCat = useMemo(
-    () => categories.find((c) => c.name === '舒適配飾' || c.slug === 'accessories'),
-    [categories]
-  );
-  const essentialsCat = useMemo(
-    () => categories.find((c) => c.name === '日之選用' || c.slug === 'essentials' || c.slug === 'home'),
-    [categories]
-  );
-  const foodCat = useMemo(
-    () => categories.find((c) => c.name === '食光選物' || c.slug === 'food' || c.slug === 'food-pantry'),
-    [categories]
-  );
-  const saleCat = useMemo(
-    () => categories.find((c) => c.type === 'sale' || c.name === '限時特價' || c.id === 'sale'),
-    [categories]
+  // 統一的分類商品取得函式 (所有分類一視同仁)
+  // 嚴格規則：只有該分類在商品資料庫實際存在符合條件且已上架 (isActive !== false) 的商品才回傳
+  // 絕不使用 fallback、不拿其他分類或最新商品填補
+  const getProductsForCategory = useCallback(
+    (category: Category): Product[] => {
+      const matched = allProducts.filter((product) => {
+        if (product.isActive === false) return false;
+        return isProductInCategory(product, category);
+      });
+      return sortByCreatedAtDesc(matched).slice(0, 5);
+    },
+    [allProducts, isProductInCategory, sortByCreatedAtDesc]
   );
 
-  // 1. 最新商品 (新品上市) - 依 created_at DESC 排序只取 5 筆
-  const newArrivalProducts = useMemo(() => {
-    const activeProducts = allProducts.filter((p) => p.isActive !== false);
-    return sortByCreatedAtDesc(activeProducts).slice(0, 5);
-  }, [allProducts]);
-
-  // Helper for category products (latest 5)
-  const getCategoryProducts = (catName: string, catObj?: Category) => {
-    const matched = allProducts.filter((p) => {
-      if (p.isActive === false) return false;
-      if (catObj && isProductInCategory(p, catObj)) return true;
-      return p.categoryName === catName;
-    });
-    return sortByCreatedAtDesc(matched).slice(0, 5);
-  };
-
-  // 2. 生活補給 - category =「生活補給」最新 5 個
-  const lifeProducts = useMemo(() => {
-    return getCategoryProducts('生活補給', lifeCat);
-  }, [allProducts, lifeCat, isProductInCategory]);
-
-  // 3. 精選美研 - category =「精選美研」最新 5 個
-  const beautyProducts = useMemo(() => {
-    return getCategoryProducts('精選美研', beautyCat);
-  }, [allProducts, beautyCat, isProductInCategory]);
-
-  // 4. 舒適配飾 - category =「舒適配飾」最新 5 個
-  const accessoriesProducts = useMemo(() => {
-    return getCategoryProducts('舒適配飾', accessoriesCat);
-  }, [allProducts, accessoriesCat, isProductInCategory]);
-
-  // 5. 日之選用 - category =「日之選用」最新 5 個
-  const essentialsProducts = useMemo(() => {
-    return getCategoryProducts('日之選用', essentialsCat);
-  }, [allProducts, essentialsCat, isProductInCategory]);
-
-  // 6. 食光選物 - category =「食光選物」最新 5 個
-  const foodProducts = useMemo(() => {
-    return getCategoryProducts('食光選物', foodCat);
-  }, [allProducts, foodCat, isProductInCategory]);
-
-  // 7. 限時特價 - is_sale = true 依 created_at DESC 排序只取 5 個
-  const saleProducts = useMemo(() => {
-    const saleList = allProducts.filter((p) => {
-      if (p.isActive === false) return false;
-      return Boolean(
-        p.isClearance ||
-        p.rawSupabaseData?.is_sale ||
-        (saleCat && isProductInCategory(p, saleCat)) ||
-        isItemOnSale(p)
-      );
-    });
-    return sortByCreatedAtDesc(saleList).slice(0, 5);
-  }, [allProducts, saleCat, isProductInCategory]);
+  // 統一計算所有有商品的分類 sections
+  // 僅當 category.is_active !== false 且 products.length > 0 時才納入顯示列表
+  // 若該分類目前無任何商品 (products.length === 0)，則該 Section 絕不渲染
+  const activeSections = useMemo(() => {
+    return categories
+      .filter((cat) => cat.is_active !== false)
+      .map((cat) => ({
+        category: cat,
+        products: getProductsForCategory(cat),
+      }))
+      .filter((section) => section.products.length > 0);
+  }, [categories, getProductsForCategory]);
 
   return (
     <div className="w-full pb-16 bg-[#F6F3EA]">
-      {/* 1. 新品上市 */}
-      <ProductSection
-        title="新品上市"
-        products={newArrivalProducts}
-        onMoreClick={() => onSelectCategory((newArrivalsCat ? newArrivalsCat.id : 'new-arrivals') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-new-arrivals"
-      />
-
-      {/* 2. 生活補給 */}
-      <ProductSection
-        title="生活補給"
-        products={lifeProducts}
-        onMoreClick={() => onSelectCategory((lifeCat ? lifeCat.id : 'life') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-life"
-      />
-
-      {/* 3. 精選美研 */}
-      <ProductSection
-        title="精選美研"
-        products={beautyProducts}
-        onMoreClick={() => onSelectCategory((beautyCat ? beautyCat.id : 'beauty') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-beauty"
-      />
-
-      {/* 4. 舒適配飾 */}
-      <ProductSection
-        title="舒適配飾"
-        products={accessoriesProducts}
-        onMoreClick={() => onSelectCategory((accessoriesCat ? accessoriesCat.id : 'accessories') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-accessories"
-      />
-
-      {/* 5. 日之選用 */}
-      <ProductSection
-        title="日之選用"
-        products={essentialsProducts}
-        onMoreClick={() => onSelectCategory((essentialsCat ? essentialsCat.id : 'essentials') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-essentials"
-      />
-
-      {/* 6. 食光選物 */}
-      <ProductSection
-        title="食光選物"
-        products={foodProducts}
-        onMoreClick={() => onSelectCategory((foodCat ? foodCat.id : 'food-pantry') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-food"
-      />
-
-      {/* 7. 限時特價 */}
-      <ProductSection
-        title="限時特價"
-        products={saleProducts}
-        onMoreClick={() => onSelectCategory((saleCat ? saleCat.id : 'sale') as CategoryId)}
-        onSelectProduct={onSelectProduct}
-        sectionId="section-sale"
-      />
+      {allProducts.length === 0 ? (
+        /* 當尚未放入 products.json 或商品為空時的友善提示區塊，防止白屏 */
+        <div className="max-w-2xl mx-auto px-4 py-20 text-center animate-in fade-in duration-300">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-[#438DB8]/10 text-[#438DB8] flex items-center justify-center">
+            <PackageOpen className="w-7 h-7" />
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold text-[#263B3F] font-serif-brand mb-2.5">
+            商品資料庫準備就緒
+          </h2>
+          <p className="text-xs sm:text-sm text-[#263B3F]/70 max-w-md mx-auto leading-relaxed mb-4">
+            官網商品讀取架構已全面切換為本地 JSON 模式。<br />
+            請將商品 JSON 放置於 <code className="px-1.5 py-0.5 bg-white rounded-md border border-[#263B3F]/15 font-mono text-xs text-[#438DB8] font-semibold">src/data/products.json</code>，系統即會自動載入各分類商品與即時呈現。
+          </p>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 border border-[#263B3F]/10 text-[11px] text-[#263B3F]/60">
+            <span>支援規格切換 ∙ 零成本欄位 ∙ 嚴格真實價格展示</span>
+          </div>
+        </div>
+      ) : (
+        activeSections.map(({ category, products }) => (
+          <ProductSection
+            key={category.id || category.slug || category.name}
+            title={category.name}
+            products={products}
+            onMoreClick={() => onSelectCategory(category.id as CategoryId)}
+            onSelectProduct={onSelectProduct}
+            sectionId={`section-${category.slug || category.id}`}
+          />
+        ))
+      )}
     </div>
   );
 };
+

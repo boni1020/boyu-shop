@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CategoryId, Product, Order, Category } from './types';
+import { CategoryId, Product, Category } from './types';
 import { CartProvider } from './context/CartContext';
 import { CategoryProvider, useCategories } from './context/CategoryContext';
 import { ProductProvider, useProducts } from './context/ProductContext';
@@ -8,20 +8,18 @@ import { HomePage } from './components/HomePage';
 import { CategoryLayout } from './components/CategoryLayout';
 import { SearchResults } from './components/SearchResults';
 import { CartView } from './components/CartView';
-import { CheckoutView } from './components/CheckoutView';
-import { OrderSuccessView } from './components/OrderSuccessView';
 import { ProductDetailModal } from './components/ProductDetailModal';
 
 function AppContent() {
   const { categories, isLoading: isCategoriesLoading, getCategoryByIdOrSlug } = useCategories();
   const { products, isLoading: isProductsLoading } = useProducts();
 
-  // App View State: 'home' | 'category' | 'search' | 'cart' | 'checkout' | 'order-success'
+  // App View State: 'home' | 'category' | 'search' | 'cart'
   const [currentView, setCurrentView] = useState<
-    'home' | 'category' | 'search' | 'cart' | 'checkout' | 'order-success'
+    'home' | 'category' | 'search' | 'cart'
   >('home');
   const [previousView, setPreviousView] = useState<
-    'home' | 'category' | 'search' | 'cart' | 'checkout' | 'order-success'
+    'home' | 'category' | 'search' | 'cart'
   >('home');
   const [activeCategoryId, setActiveCategoryId] = useState<CategoryId>('life');
 
@@ -34,10 +32,7 @@ function AppContent() {
   // Selected product for detail modal
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
-  // Last submitted Order for order-success view
-  const [lastOrder, setLastOrder] = useState<Order | null>(null);
-
-  // Active category object from Supabase Context (Strict: No fake fallback)
+  // Active category object from Context (Strict: No fake fallback)
   const currentCategory: Category = React.useMemo(() => {
     const found = getCategoryByIdOrSlug(activeCategoryId);
     if (found) return found;
@@ -108,31 +103,12 @@ function AppContent() {
     }
   };
 
-  // Handler: Navigate to Checkout (/checkout)
-  const handleNavigateCheckout = () => {
-    setCurrentView('checkout');
-    window.location.hash = 'checkout';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Handler: Order Success (/order-success)
-  const handleOrderSuccess = (order: Order) => {
-    setLastOrder(order);
-    setCurrentView('order-success');
-    window.location.hash = 'order-success';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   // Synchronize browser history / URL hash
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (hash === 'cart') {
         setCurrentView('cart');
-      } else if (hash === 'checkout') {
-        setCurrentView('checkout');
-      } else if (hash === 'order-success') {
-        setCurrentView('order-success');
       } else if (hash.startsWith('category/')) {
         const catId = hash.replace('category/', '') as CategoryId;
         const exists = getCategoryByIdOrSlug(catId);
@@ -214,24 +190,8 @@ function AppContent() {
 
         {currentView === 'cart' && (
           <CartView
-            onNavigateCheckout={handleNavigateCheckout}
             onNavigateHome={handleNavigateHome}
             onSelectProduct={setSelectedProduct}
-          />
-        )}
-
-        {currentView === 'checkout' && (
-          <CheckoutView
-            onNavigateCart={handleNavigateCart}
-            onNavigateHome={handleNavigateHome}
-            onOrderSuccess={handleOrderSuccess}
-          />
-        )}
-
-        {currentView === 'order-success' && (
-          <OrderSuccessView
-            order={lastOrder}
-            onNavigateHome={handleNavigateHome}
           />
         )}
       </main>
